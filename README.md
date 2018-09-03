@@ -1,6 +1,6 @@
 # Seven Otters
 
-**The [White Peaks](http://www.whitepeaksmobile.ch) CQRS/ES Starter Kit for the BEAM.**
+**A CQRS/ES Starter Kit for the BEAM.**
 
 To do (in sparse order):
 - [x] Event store
