@@ -1,4 +1,4 @@
-defmodule Seven.Command do
+defmodule Seven.Otters.Command do
   @moduledoc false
 
   defstruct _id: nil,

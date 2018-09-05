@@ -14,8 +14,8 @@ defmodule Seven.Log do
   def warning(msg) when is_bitstring(msg), do: Logger.warn(fn -> msg end)
   def error(msg) when is_bitstring(msg), do: Logger.error(fn -> msg end)
 
-  @spec command_received(Seven.Command.t()) :: Seven.Command.t()
-  def command_received(%Seven.Command{} = command) do
+  @spec command_received(Seven.Otters.Command.t()) :: Seven.Otters.Command.t()
+  def command_received(%Seven.Otters.Command{} = command) do
     if Application.get_env(:seven, :print_commands) do
       Bunt.puts([
         :steelblue,
@@ -38,8 +38,8 @@ defmodule Seven.Log do
     request
   end
 
-  @spec event_received(Seven.Event.t(), Atom.t()) :: Seven.Event.t()
-  def event_received(%Seven.Event{} = event, module) do
+  @spec event_received(Seven.Otters.Event.t(), Atom.t()) :: Seven.Otters.Event.t()
+  def event_received(%Seven.Otters.Event{} = event, module) do
     if Application.get_env(:seven, :print_events) do
       Bunt.puts([
         :orange,
@@ -51,8 +51,8 @@ defmodule Seven.Log do
     event
   end
 
-  @spec event_fired(Seven.Event.t()) :: Seven.Event.t()
-  def event_fired(%Seven.Event{} = event) do
+  @spec event_fired(Seven.Otters.Event.t()) :: Seven.Otters.Event.t()
+  def event_fired(%Seven.Otters.Event{} = event) do
     if Application.get_env(:seven, :print_events) do
       Bunt.puts([
         :orange,

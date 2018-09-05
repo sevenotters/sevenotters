@@ -1,4 +1,4 @@
-defmodule Seven.Aggregate do
+defmodule Seven.Otters.Aggregate do
   @moduledoc false
 
   defmacro __using__(aggregate_field: aggregate_field) do

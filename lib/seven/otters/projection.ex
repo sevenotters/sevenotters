@@ -1,4 +1,4 @@
-defmodule Seven.Model do
+defmodule Seven.Otters.Projection do
   @moduledoc false
 
   defmacro __using__(listener_of_events: listener_of_events) do
@@ -7,7 +7,7 @@ defmodule Seven.Model do
       use Seven.Utils.ListOfMaps
 
       use Seven.Utils.Tagger
-      @tag :model
+      @tag :projection
 
       # API
       def start_link(opts \\ []) do
@@ -23,14 +23,12 @@ defmodule Seven.Model do
       @spec filter((any -> any)) :: List.t()
       def filter(map_func), do: GenServer.call(__MODULE__, {:filter, map_func})
 
-      @spec find((any -> any)) :: any
-      def find(map_func), do: GenServer.call(__MODULE__, {:find, map_func})
+      @spec query(Atom.t(), Map.t()) :: List.t()
+      def query(query_filter, params),
+        do: GenServer.call(__MODULE__, {:query, query_filter, params})
 
-      @spec state() :: any
+      @spec state() :: List.t()
       def state(), do: GenServer.call(__MODULE__, :state)
-
-      @spec set_state(any) :: any
-      def set_state(state), do: GenServer.call(__MODULE__, {:set_state, state})
 
       @spec pid() :: pid
       def pid, do: GenServer.call(__MODULE__, :pid)
@@ -50,15 +48,22 @@ defmodule Seven.Model do
         {:ok, state}
       end
 
-      def handle_call({:find, find_func}, _from, state),
-        do: {:reply, handle_find(find_func, state), state}
+      def handle_call({:query, query_filter, params}, _from, state) do
+        params = AtomicMap.convert(params, safe: false)
+
+        res =
+          case pre_handle_query(query_filter, params, state) do
+            :ok -> {:ok, handle_query(query_filter, params, state)}
+            err -> err
+          end
+
+        {:reply, res, state}
+      end
 
       def handle_call({:filter, filter_func}, _from, state),
         do: {:reply, handle_filter(filter_func, state), state}
 
       def handle_call(:state, _from, state), do: {:reply, handle_state(state), state}
-
-      def handle_call({:set_state, new_state}, _from, _state), do: {:reply, :ok, new_state}
 
       def handle_call(:pid, _from, state), do: {:reply, self(), state}
       def handle_call(:clean, _from, state), do: {:reply, :ok, initial_state()}
@@ -84,13 +89,20 @@ defmodule Seven.Model do
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates
-      @spec apply_events(List.t(), any) :: any
+      @spec apply_events(List.t(), Map.t()) :: Map.t()
       defp apply_events([], state), do: state
 
       defp apply_events([event | events], state) do
         Seven.Log.event_received(event, __MODULE__)
         new_state = handle_event(event, state)
         apply_events(events, new_state)
+      end
+
+      defp validate(params, schema) do
+        case Ve.validate(params, schema) do
+          {:ok, _} -> :ok
+          err -> err
+        end
       end
     end
   end

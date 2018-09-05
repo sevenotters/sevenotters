@@ -1,7 +1,7 @@
 defmodule Seven.SyncCommand do
   alias Seven.SyncCommandRequest
 
-  @spec execute(Seven.SyncCommandRequest.t()) :: {:ok, Seven.Event.t()} | {:error, any}
+  @spec execute(Seven.SyncCommandRequest.t()) :: {:ok, Seven.Otters.Event.t()} | {:error, any}
   def execute(command_request) do
     command_request
     |> Map.merge(%{request_id: Seven.Data.Persistence.new_id()})
@@ -75,7 +75,7 @@ defmodule Seven.SyncCommand do
 
   defp wait_for_one_of_events(request_id, events, incoming_events) do
     receive do
-      %Seven.Event{request_id: ^request_id} = e ->
+      %Seven.Otters.Event{request_id: ^request_id} = e ->
         if e.type not in events do
           wait_for_one_of_events(request_id, events, incoming_events)
         else

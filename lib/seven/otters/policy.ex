@@ -1,4 +1,4 @@
-defmodule Seven.Policy do
+defmodule Seven.Otters.Policy do
   @moduledoc false
 
   defmacro __using__(listener_of_events: listener_of_events) do

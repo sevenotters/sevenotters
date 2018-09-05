@@ -1,4 +1,4 @@
-defmodule Seven.Event do
+defmodule Seven.Otters.Event do
   @moduledoc false
 
   defstruct _id: nil,

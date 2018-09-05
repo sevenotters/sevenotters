@@ -1,4 +1,4 @@
-defmodule Seven.Service do
+defmodule Seven.Otters.Process do
   @moduledoc false
 
   defmacro __using__(_opts) do
@@ -6,7 +6,7 @@ defmodule Seven.Service do
       use GenServer
 
       use Seven.Utils.Tagger
-      @tag :service
+      @tag :process
 
       # API
       def start_link(opts \\ []) do
@@ -46,7 +46,7 @@ defmodule Seven.Service do
       def terminate(:normal, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")
       end
-      def terminate(reason, state) do
+      def terminate(reason, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
         IO.inspect("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
       end
@@ -56,7 +56,7 @@ defmodule Seven.Service do
         Seven.Log.debug("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         {:noreply, state}
       end
-      def handle_info(msg, state), do: handle_service_info(msg, state)
+      def handle_info(_, state), do: {:noreply, state}
 
       # Privates
       @spec set_request_id(List.t(), String.t()) :: List.t()
