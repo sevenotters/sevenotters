@@ -48,7 +48,7 @@ defmodule Seven.Otters.Aggregate do
         Seven.Log.debug("Init (#{inspect(self())}): #{inspect(correlation_id)}")
 
         state =
-          Seven.EventStore.events_by(%{correlation_id: correlation_id})
+          Seven.EventStore.EventStore.events_by(%{correlation_id: correlation_id})
           |> apply_events(init_state())
 
         {:noreply,
@@ -159,7 +159,7 @@ defmodule Seven.Otters.Aggregate do
       defp trigger([]), do: :ok
 
       defp trigger([event | events]) do
-        Seven.EventStore.fire(event)
+        Seven.EventStore.EventStore.fire(event)
         trigger(events)
       end
 

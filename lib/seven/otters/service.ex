@@ -72,7 +72,7 @@ defmodule Seven.Otters.Service do
       defp trigger([]), do: :ok
 
       defp trigger([event | events]) do
-        Seven.EventStore.fire(event)
+        Seven.EventStore.EventStore.fire(event)
         trigger(events)
       end
 

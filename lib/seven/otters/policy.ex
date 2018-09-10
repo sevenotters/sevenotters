@@ -14,7 +14,7 @@ defmodule Seven.Otters.Policy do
 
         # subscribe my events in store
         unquote(listener_of_events)
-        |> Enum.each(&Seven.EventStore.subscribe(&1, pid))
+        |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, pid))
 
         {:ok, pid}
       end

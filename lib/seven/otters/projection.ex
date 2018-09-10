@@ -15,7 +15,7 @@ defmodule Seven.Otters.Projection do
 
         # subscribe my events in store
         unquote(listener_of_events)
-        |> Enum.each(&Seven.EventStore.subscribe(&1, pid))
+        |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, pid))
 
         {:ok, pid}
       end
@@ -42,7 +42,7 @@ defmodule Seven.Otters.Projection do
 
         state =
           unquote(listener_of_events)
-          |> Seven.EventStore.events_by_types()
+          |> Seven.EventStore.EventStore.events_by_types()
           |> apply_events(initial_state())
 
         {:ok, state}

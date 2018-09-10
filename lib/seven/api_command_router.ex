@@ -51,7 +51,7 @@ defmodule Seven.ApiCommandRouter do
         do: req
 
       defp subscribe_to_event_store(%ApiRequest{state: :unmanaged, wait_for_events: wait_for_events} = req) do
-        wait_for_events |> Enum.each(&Seven.EventStore.subscribe(&1, self()))
+        wait_for_events |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))
         req
       end
 
@@ -87,7 +87,7 @@ defmodule Seven.ApiCommandRouter do
         do: req
 
       defp unsubscribe_to_event_store( %ApiRequest{state: :managed, wait_for_events: wait_for_events} = req) do
-        wait_for_events |> Enum.each(&Seven.EventStore.unsubscribe(&1, self()))
+        wait_for_events |> Enum.each(&Seven.EventStore.EventStore.unsubscribe(&1, self()))
         req
       end
 

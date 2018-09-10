@@ -4,22 +4,23 @@ defmodule EventStoreTest do
   @moduledoc false
 
   alias Seven.TestHelper
+  alias Seven.EventStore.EventStore
 
   test "subscribe and unsubscribe to event" do
     unique_event_name = TestHelper.unique_name()
 
     # Subscribe
-    Seven.EventStore.subscribe(unique_event_name, self())
-    subscribers = Seven.EventStore.state().event_store.event_to_pids
-    monitors = Seven.EventStore.state().event_store.pid_to_monitor
+    EventStore.subscribe(unique_event_name, self())
+    subscribers = EventStore.state().event_store.event_to_pids
+    monitors = EventStore.state().event_store.pid_to_monitor
 
     assert subscribers[unique_event_name] |> Enum.member?(self())
     refute monitors |> find_in_monitors() |> is_nil()
 
     # Unsubscribe
-    Seven.EventStore.unsubscribe(unique_event_name, self())
-    subscribers = Seven.EventStore.state().event_store.event_to_pids
-    monitors = Seven.EventStore.state().event_store.pid_to_monitor
+    EventStore.unsubscribe(unique_event_name, self())
+    subscribers = EventStore.state().event_store.event_to_pids
+    monitors = EventStore.state().event_store.pid_to_monitor
 
     refute subscribers[unique_event_name] |> Enum.member?(self())
     assert monitors |> find_in_monitors() |> is_nil()
@@ -40,13 +41,13 @@ defmodule EventStoreTest do
     {:ok, pid} = MyProcess.start_link()
 
     unique_event_name = TestHelper.unique_name()
-    Seven.EventStore.subscribe(unique_event_name, pid)
+    EventStore.subscribe(unique_event_name, pid)
 
     Process.exit(pid, :kill)
     refute Process.alive?(pid)
 
-    subscribers = Seven.EventStore.state().event_store.event_to_pids
-    monitors = Seven.EventStore.state().event_store.pid_to_monitor
+    subscribers = EventStore.state().event_store.event_to_pids
+    monitors = EventStore.state().event_store.pid_to_monitor
 
     refute subscribers[unique_event_name] |> Enum.member?(self())
     assert monitors |> find_in_monitors() |> is_nil()
