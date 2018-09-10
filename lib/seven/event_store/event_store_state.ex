@@ -1,4 +1,4 @@
-defmodule Seven.EventStoreState do
+defmodule Seven.EventStore.State do
   @moduledoc false
 
   @type string_to_pids :: Map.t()

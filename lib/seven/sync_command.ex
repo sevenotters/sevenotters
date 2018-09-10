@@ -1,5 +1,6 @@
 defmodule Seven.SyncCommand do
   alias Seven.SyncCommandRequest
+  alias Seven.EventStore.EventStore
 
   @spec execute(Seven.SyncCommandRequest.t()) :: {:ok, Seven.Otters.Event.t()} | {:error, any}
   def execute(command_request) do
@@ -27,7 +28,7 @@ defmodule Seven.SyncCommand do
   defp subscribe_to_event_store(
          %SyncCommandRequest{state: :unmanaged, wait_for_events: wait_for_events} = req
        ) do
-    wait_for_events |> Enum.each(&Seven.EventStore.subscribe(&1, self()))
+    wait_for_events |> Enum.each(&EventStore.subscribe(&1, self()))
     req
   end
 
@@ -39,7 +40,7 @@ defmodule Seven.SyncCommand do
   defp unsubscribe_to_event_store(
          %SyncCommandRequest{state: :managed, wait_for_events: wait_for_events} = req
        ) do
-    wait_for_events |> Enum.each(&Seven.EventStore.unsubscribe(&1, self()))
+    wait_for_events |> Enum.each(&EventStore.unsubscribe(&1, self()))
     req
   end
 

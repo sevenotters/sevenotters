@@ -1,10 +1,10 @@
-defmodule Seven.EventStore do
+defmodule Seven.EventStore.EventStore do
   use GenServer
 
   @moduledoc false
 
   alias Seven.Data.Persistence
-  alias Seven.EventStoreState
+  alias Seven.EventStore.State
 
   @events_collection "events"
   @counter_field :counter
@@ -13,8 +13,7 @@ defmodule Seven.EventStore do
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
     next_counter =
-      Persistence.max_in_collection(@events_collection, @counter_field) +
-        EventStoreState.counter_step()
+      Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
 
     Seven.Log.debug("Next event counter: #{next_counter}")
 
@@ -52,19 +51,19 @@ defmodule Seven.EventStore do
   # Callbacks
   def init({:ok, next_counter}) do
     Seven.Log.info("#{__MODULE__} started.")
-    {:ok, EventStoreState.init(next_counter)}
+    {:ok, State.init(next_counter)}
   end
 
   def handle_call(:state, _from, state),
     do: {:reply, %{event_store: state, events: Persistence.content_of(@events_collection)}, state}
 
   def handle_call({:subscribe, event_type, pid}, _from, state) do
-    new_state = EventStoreState.subscribe_pid_to_event(state, pid, event_type)
+    new_state = State.subscribe_pid_to_event(state, pid, event_type)
     {:reply, pid, new_state}
   end
 
   def handle_call({:unsubscribe, event_type, pid}, _from, state) do
-    new_state = EventStoreState.unsubscribe_pid_to_event(state, pid, event_type)
+    new_state = State.unsubscribe_pid_to_event(state, pid, event_type)
     {:reply, pid, new_state}
   end
 
@@ -82,13 +81,13 @@ defmodule Seven.EventStore do
   end
 
   def handle_cast({:fire, event}, state) do
-    event = Map.put(event, @counter_field, EventStoreState.next_counter(state))
+    event = Map.put(event, @counter_field, State.next_counter(state))
     persist(event)
 
     Seven.Log.event_fired(event)
-    fire(event, EventStoreState.pids_by_event(state, event.type))
+    fire(event, State.pids_by_event(state, event.type))
 
-    {:noreply, EventStoreState.increment_counter(state)}
+    {:noreply, State.increment_counter(state)}
   end
 
   def handle_info({:DOWN, ref, :process, pid, reason}, state) do
@@ -98,7 +97,7 @@ defmodule Seven.EventStore do
       }"
     )
 
-    {:noreply, EventStoreState.pid_is_down(state, pid)}
+    {:noreply, State.pid_is_down(state, pid)}
   end
   def handle_info(_, state), do: {:noreply, state}
 

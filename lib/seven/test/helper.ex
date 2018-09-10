@@ -17,13 +17,13 @@ defmodule Seven.Test.Helper do
   end
 
   def events_by_request(request_id),
-    do: Seven.EventStore.state().events |> Enum.filter(&(&1["request_id"] == request_id))
+    do: Seven.EventStore.EventStore.state().events |> Enum.filter(&(&1["request_id"] == request_id))
 
   def contains?(events, f), do: events |> Enum.find(nil, fn e -> f.(e) end) != nil
 
   def events_by_request_and_type(request_id, type),
     do:
-      Seven.EventStore.state().events
+      Seven.EventStore.EventStore.state().events
       |> Enum.filter(&(&1["request_id"] == request_id and &1["type"] == type))
 
   def send_command_request(%Seven.CommandRequest{} = request) do

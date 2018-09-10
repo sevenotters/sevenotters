@@ -16,7 +16,7 @@ defmodule Seven.Application do
     children = [
       worker(Seven.Data.Persistence.current(), [persistence_opts], restart: :permanent, id: :persistence),
       worker(Seven.Entities, [], restart: :permanent, id: :entities),
-      worker(Seven.EventStore, [], restart: :permanent, id: :event_store),
+      worker(Seven.EventStore.EventStore, [], restart: :permanent, id: :event_store),
       supervisor(Seven.BusinessSupervisor, [])
     ]
 
