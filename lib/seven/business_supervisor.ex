@@ -15,14 +15,13 @@ defmodule Seven.BusinessSupervisor do
     registry = [supervisor(Registry, [:unique, :registry])]
 
     opts = [strategy: :one_for_one]
-    models = Seven.Entities.models() |> Map.values() |> additional_workers()
     policies = Seven.Entities.policies() |> additional_workers()
     services = Seven.Entities.services() |> additional_workers()
     processes = Seven.Entities.processes() |> additional_workers()
     projections = Seven.Entities.projections() |> Map.values() |> additional_workers()
 
     supervise(
-      policies ++ services ++ processes ++ registry ++ models ++ projections,
+      policies ++ services ++ processes ++ registry ++ projections,
       opts
     )
   end

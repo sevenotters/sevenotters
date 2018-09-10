@@ -1,9 +1,9 @@
-defmodule Seven.ApiQueryRouter do
+defmodule Seven.Sync.ApiQueryRouter do
   defp is_not_nil(arg), do: not is_nil(arg)
 
   defmacro __using__(post: post) do
     quote location: :keep do
-      alias Seven.ApiRequest
+      alias Seven.Sync.ApiRequest
 
       @doc false
       def run(conn) do
@@ -22,7 +22,8 @@ defmodule Seven.ApiQueryRouter do
 
       # Privates
       defp crc_signature_checker(%ApiRequest{state: :unmanaged} = req) do
-        Playtrip.Api.App.CrcSignature.verify(req)
+        # Api.App.CrcSignature.verify(req)
+        # req
       end
 
       defp filter_data(%ApiRequest{state: :managed, filter: filter} = req) when not is_nil(filter),

@@ -1,8 +1,8 @@
-defmodule Seven.SyncCommand do
-  alias Seven.SyncCommandRequest
+defmodule Seven.Sync.SyncCommand do
+  alias Seven.Sync.SyncCommandRequest
   alias Seven.EventStore.EventStore
 
-  @spec execute(Seven.SyncCommandRequest.t()) :: {:ok, Seven.Otters.Event.t()} | {:error, any}
+  @spec execute(Seven.Sync.SyncCommandRequest.t()) :: {:ok, Seven.Otters.Event.t()} | {:error, any}
   def execute(command_request) do
     command_request
     |> Map.merge(%{request_id: Seven.Data.Persistence.new_id()})

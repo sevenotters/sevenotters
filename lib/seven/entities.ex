@@ -16,8 +16,7 @@ defmodule Seven.Entities do
       services: extract_entities(modules, :service),
       processes: extract_entities(modules, :process),
       policies: extract_entities(modules, :policy),
-      projections: extract_named_entities(modules, :projection),
-      models: extract_named_entities(modules, :model)
+      projections: extract_named_entities(modules, :projection)
     }
 
     GenServer.start_link(__MODULE__, {:ok, state}, opts ++ [name: __MODULE__])
@@ -33,14 +32,12 @@ defmodule Seven.Entities do
   def processes(), do: GenServer.call(__MODULE__, :processes)
   def policies(), do: GenServer.call(__MODULE__, :policies)
   def projections(), do: GenServer.call(__MODULE__, :projections)
-  def models(), do: GenServer.call(__MODULE__, :models)
 
   def handle_call(:aggregates, _from, state), do: {:reply, state.aggregates, state}
   def handle_call(:services, _from, state), do: {:reply, state.services, state}
   def handle_call(:processes, _from, state), do: {:reply, state.processes, state}
   def handle_call(:policies, _from, state), do: {:reply, state.policies, state}
   def handle_call(:projections, _from, state), do: {:reply, state.projections, state}
-  def handle_call(:models, _from, state), do: {:reply, state.models, state}
 
   defp module_name(m), do: m |> to_string() |> String.split(".") |> List.last |> String.to_atom()
 

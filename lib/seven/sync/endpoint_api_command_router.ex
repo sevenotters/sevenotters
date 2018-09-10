@@ -1,12 +1,8 @@
-defmodule Seven.EndpointApiQueryRouter do
+defmodule Seven.Sync.EndpointApiCommandRouter do
   defmacro __using__(conn: conn, posts: posts) do
     quote location: :keep do
-      use Plug.Router
-
-      @moduledoc false
-
       alias Plug.Conn.Status
-      alias Seven.ApiRequest
+      alias Seven.Sync.ApiRequest
 
       plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Poison)
       plug(CORSPlug)
@@ -18,7 +14,7 @@ defmodule Seven.EndpointApiQueryRouter do
         posts
         |> Enum.map(fn p ->
           quote do
-            post "/" <> unquote(p).query do
+            post "/" <> unquote(p).command do
               unquote(p).module.run(unquote(conn))
               |> send_response(unquote(conn))
             end
@@ -29,7 +25,7 @@ defmodule Seven.EndpointApiQueryRouter do
       match _ do
         unquote(conn)
         |> put_resp_header("content-type", "application/json")
-        |> send_resp(Status.code(:not_found), "query_not_found")
+        |> send_resp(Status.code(:not_found), "command_not_found")
       end
 
       defp send_response(%ApiRequest{state: :managed, response: data}, conn) do
@@ -38,28 +34,46 @@ defmodule Seven.EndpointApiQueryRouter do
         |> send_resp(Status.code(:ok), encode(data))
       end
 
-      defp send_response(%ApiRequest{state: {:unauthorized, reason}}, conn) do
-        conn
-        |> put_resp_header("content-type", "application/json")
-        |> send_resp(Status.code(:unauthorized), encode(%{error: reason}))
-      end
-
       defp send_response(%ApiRequest{state: {:routed_but_invalid, reason}}, conn) do
         conn
         |> put_resp_header("content-type", "application/json")
         |> send_resp(Status.code(:bad_request), encode(%{error: reason}))
       end
 
-      defp send_response(%ApiRequest{state: :query_not_found}, conn) do
+      defp send_response(%ApiRequest{state: {:sync_validation_failed, reason}}, conn) do
         conn
         |> put_resp_header("content-type", "application/json")
-        |> send_resp(Status.code(:not_found), encode(%{error: "query_not_found"}))
+        |> send_resp(Status.code(:bad_request), encode(%{error: reason}))
+      end
+
+      defp send_response(%ApiRequest{state: :not_managed}, conn) do
+        conn
+        |> put_resp_header("content-type", "application/json")
+        |> send_resp(Status.code(:not_found), encode(%{error: "not_found"}))
+      end
+
+      defp send_response(%ApiRequest{state: {:unauthorized, reason}}, conn) do
+        conn
+        |> put_resp_header("content-type", "application/json")
+        |> send_resp(Status.code(:unauthorized), encode(%{error: reason}))
+      end
+
+      defp send_response(%ApiRequest{state: :command_not_found}, conn) do
+        conn
+        |> put_resp_header("content-type", "application/json")
+        |> send_resp(Status.code(:not_found), encode(%{error: "command_not_found"}))
       end
 
       defp send_response(%ApiRequest{state: {:resource_not_found, reason}}, conn) do
         conn
         |> put_resp_header("content-type", "application/json")
         |> send_resp(Status.code(:not_found), encode(%{error: reason}))
+      end
+
+      defp send_response(%ApiRequest{state: :timeout}, conn) do
+        conn
+        |> put_resp_header("content-type", "application/json")
+        |> send_resp(Status.code(:request_timeout), encode(%{error: "timeout"}))
       end
 
       @spec encode(Map.t()) :: String.t()

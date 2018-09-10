@@ -1,4 +1,4 @@
-defmodule Seven.EndpointCommandRouter do
+defmodule Seven.Sync.EndpointCommandRouter do
   use Plug.Router
 
   @moduledoc false

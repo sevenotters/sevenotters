@@ -1,9 +1,9 @@
-defmodule Seven.ApiCommandRouter do
+defmodule Seven.Sync.ApiCommandRouter do
   defp is_not_nil(arg), do: not is_nil(arg)
 
   defmacro __using__(post: post) do
     quote location: :keep do
-      alias Seven.ApiRequest
+      alias Seven.Sync.ApiRequest
 
       @doc false
       def run(conn) do

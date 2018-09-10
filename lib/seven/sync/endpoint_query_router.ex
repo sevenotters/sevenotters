@@ -1,4 +1,4 @@
-defmodule Seven.EndpointQueryRouter do
+defmodule Seven.Sync.EndpointQueryRouter do
   use Plug.Router
 
   @moduledoc false

@@ -1,4 +1,4 @@
-defmodule Seven.CqrsRouter do
+defmodule Seven.Sync.CqrsRouter do
   @moduledoc false
 
   defmacro __using__(command_router: command_router, query_router: query_router) do
