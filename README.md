@@ -28,3 +28,5 @@ To do (in sparse order):
 - [ ] Authentication support (to a different project as helper library)
 - [ ] Authorization support (to a different project as helper library)
 
+## Feedback
+Feel free to send feedback to [seven.otters.project@gmail.com](seven.otters.project@gmail.com)
