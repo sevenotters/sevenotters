@@ -8,6 +8,7 @@ To do (in sparse order):
     - [ ] Abstract for different stores beyond Mongo 
 - [x] Event structure
 - [x] Command
+- [x] Command bus
 - [x] Aggregate
     - [ ] Snapshot implementation
     - [ ] Unit test documentation

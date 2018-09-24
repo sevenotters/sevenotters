@@ -13,7 +13,6 @@ defmodule Seven.Test.Helper do
   def clean_models do
     # Some projections/models can be already loaded before cleaning events, clean it
     Seven.Entities.projections() |> Enum.each(fn {_, module} -> module.clean() end)
-    Seven.Entities.models() |> Enum.each(fn {_, module} -> module.clean() end)
   end
 
   def events_by_request(request_id),

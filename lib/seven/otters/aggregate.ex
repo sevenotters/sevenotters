@@ -1,5 +1,34 @@
 defmodule Seven.Otters.Aggregate do
-  @moduledoc false
+  @moduledoc """
+  Provides the ``use`` macro to create an aggregate.
+
+  Example:
+
+      defmodule SevenCommerce.Aggregates.User do
+        use Seven.Otters.Aggregate, aggregate_field: :id
+
+        defstruct id: nil,
+                  user: nil,
+                  password: nil,
+                  cart: []
+
+        defp init_state, do: %__MODULE__{}
+
+        defp pre_handle_command(_command, _state), do: :ok
+        defp handle_command(_command, _state), do: {:managed, []}
+        defp handle_event(_event, state), do: state
+      end
+
+  Module must declare the use of `Seven.Otters.Aggregate` module, specifying the field to use as correlation id;
+  the field must be present in module structure:
+
+      use Seven.Otters.Aggregate, aggregate_field: :id
+
+      defstruct id: nil,
+                ...
+
+  Some function must be implemented in the aggregate. 
+  """
 
   defmacro __using__(aggregate_field: aggregate_field) do
     quote location: :keep do
@@ -9,8 +38,8 @@ defmodule Seven.Otters.Aggregate do
       use Seven.Utils.Tagger
       @tag :aggregate
 
-      @max_lifetime_minutes Application.get_env(:seven, :aggregate_lifetime)
-      @lifetime_minutes_check div(Application.get_env(:seven, :aggregate_lifetime), 2)
+      @max_lifetime_minutes Application.get_env(:seven, :aggregate_lifetime) || 60
+      @lifetime_minutes_check div(@max_lifetime_minutes, 2)
 
       def init(args), do: {:ok, args}
 
@@ -143,11 +172,11 @@ defmodule Seven.Otters.Aggregate do
 
       @spec create_event(String.t(), Map.t()) :: Map.t()
       defp create_event(type, payload) when is_map(payload) do
-        Seven.Event.create(type, payload)
+        Seven.Otters.Event.create(type, payload)
         |> Map.put(:correlation_module, __MODULE__)
       end
 
-      @spec apply_events([Seven.Event.t()], Map.t()) :: Map.t()
+      @spec apply_events([Seven.Otters.Event.t()], Map.t()) :: Map.t()
       defp apply_events([], state), do: state
 
       defp apply_events([event | events], state) do

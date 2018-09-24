@@ -34,13 +34,14 @@ defmodule Seven.Mixfile do
       {:atomic_map, "== 0.9.3"},
       {:bunt, "== 0.2.0"},
       {:cors_plug, "== 1.5.2"},
-      {:credo, "== 0.10.0", only: :dev, runtime: false},
+      {:credo, "== 0.10.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:logger_file_backend, "== 0.0.10"},
       {:mongodb, "== 0.4.6"},
-      {:plug, "== 1.6.2"},
+      {:plug, "== 1.6.3"},
       {:poison, "== 4.0.1"},
       {:poolboy, "== 1.5.1"},
-      {:timex, "== 3.3.0"},
+      {:timex, "== 3.4.1"},
       {:uuid, "== 1.1.8"},
       {:ve, "== 0.1.8"}
     ]
