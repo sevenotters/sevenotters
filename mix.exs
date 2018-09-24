@@ -43,7 +43,7 @@ defmodule Seven.Mixfile do
       {:poolboy, "== 1.5.1"},
       {:timex, "== 3.4.1"},
       {:uuid, "== 1.1.8"},
-      {:ve, "== 0.1.8"}
+      {:ve, "== 0.1.9"}
     ]
   end
 end
