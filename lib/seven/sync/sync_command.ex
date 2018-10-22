@@ -2,7 +2,8 @@ defmodule Seven.Sync.SyncCommand do
   alias Seven.Sync.SyncCommandRequest
   alias Seven.EventStore.EventStore
 
-  @spec execute(Seven.Sync.SyncCommandRequest.t()) :: {:ok, Seven.Otters.Event.t()} | {:error, any}
+  @spec execute(Seven.Sync.SyncCommandRequest.t()) ::
+          {:ok, Seven.Otters.Event.t()} | {:error, any}
   def execute(command_request) do
     command_request
     |> Map.merge(%{request_id: Seven.Data.Persistence.new_id()})
@@ -22,8 +23,10 @@ defmodule Seven.Sync.SyncCommand do
 
   defp wait_events(%SyncCommandRequest{} = req), do: req
 
-  defp subscribe_to_event_store(%SyncCommandRequest{state: :unmanaged, wait_for_events: []} = req),
-    do: req
+  defp subscribe_to_event_store(
+         %SyncCommandRequest{state: :unmanaged, wait_for_events: []} = req
+       ),
+       do: req
 
   defp subscribe_to_event_store(
          %SyncCommandRequest{state: :unmanaged, wait_for_events: wait_for_events} = req
@@ -34,8 +37,10 @@ defmodule Seven.Sync.SyncCommand do
 
   defp subscribe_to_event_store(%SyncCommandRequest{} = req), do: req
 
-  defp unsubscribe_to_event_store(%SyncCommandRequest{state: :managed, wait_for_events: []} = req),
-    do: req
+  defp unsubscribe_to_event_store(
+         %SyncCommandRequest{state: :managed, wait_for_events: []} = req
+       ),
+       do: req
 
   defp unsubscribe_to_event_store(
          %SyncCommandRequest{state: :managed, wait_for_events: wait_for_events} = req

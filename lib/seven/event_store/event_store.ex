@@ -99,6 +99,7 @@ defmodule Seven.EventStore.EventStore do
 
     {:noreply, State.pid_is_down(state, pid)}
   end
+
   def handle_info(_, state), do: {:noreply, state}
 
   # Privates

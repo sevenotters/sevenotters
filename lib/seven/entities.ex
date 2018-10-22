@@ -3,14 +3,14 @@ defmodule Seven.Entities do
 
   @moduledoc false
 
-  @opts (Application.get_all_env(:seven)[__MODULE__] || [entity_app: :seven])
+  @opts Application.get_all_env(:seven)[__MODULE__] || [entity_app: :seven]
 
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
-
-    app =  @opts[:entity_app]
+    app = @opts[:entity_app]
 
     {:ok, modules} = :application.get_key(app, :modules) || {:ok, []}
+
     state = %{
       aggregates: extract_entities(modules, :aggregate),
       services: extract_entities(modules, :service),
@@ -39,7 +39,8 @@ defmodule Seven.Entities do
   def handle_call(:policies, _from, state), do: {:reply, state.policies, state}
   def handle_call(:projections, _from, state), do: {:reply, state.projections, state}
 
-  defp module_name(m), do: m |> to_string() |> String.split(".") |> List.last |> String.to_atom()
+  defp module_name(m),
+    do: m |> to_string() |> String.split(".") |> List.last() |> String.to_atom()
 
   defp extract_entities(modules, tag) do
     Enum.filter(modules, fn m ->

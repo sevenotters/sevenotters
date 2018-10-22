@@ -71,6 +71,7 @@ defmodule Seven.Otters.Projection do
       def terminate(:normal, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")
       end
+
       def terminate(reason, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
         IO.inspect("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
@@ -81,11 +82,13 @@ defmodule Seven.Otters.Projection do
         Seven.Log.debug("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         {:noreply, state}
       end
+
       def handle_info(%Seven.Event{} = event, state) do
         Seven.Log.event_received(event, __MODULE__)
 
         {:noreply, handle_event(event, state)}
       end
+
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates

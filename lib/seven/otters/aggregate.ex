@@ -102,6 +102,7 @@ defmodule Seven.Otters.Aggregate do
       def terminate(:normal, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")
       end
+
       def terminate(reason, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
         IO.inspect("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
@@ -133,6 +134,7 @@ defmodule Seven.Otters.Aggregate do
             {:noreply, state}
         end
       end
+
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates

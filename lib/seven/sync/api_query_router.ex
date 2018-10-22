@@ -26,8 +26,9 @@ defmodule Seven.Sync.ApiQueryRouter do
         # req
       end
 
-      defp filter_data(%ApiRequest{state: :managed, filter: filter} = req) when not is_nil(filter),
-        do: filter.(req)
+      defp filter_data(%ApiRequest{state: :managed, filter: filter} = req)
+           when not is_nil(filter),
+           do: filter.(req)
 
       defp filter_data(%ApiRequest{} = req), do: req
 

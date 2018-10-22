@@ -16,7 +16,8 @@ defmodule Seven.Test.Helper do
   end
 
   def events_by_request(request_id),
-    do: Seven.EventStore.EventStore.state().events |> Enum.filter(&(&1["request_id"] == request_id))
+    do:
+      Seven.EventStore.EventStore.state().events |> Enum.filter(&(&1["request_id"] == request_id))
 
   def contains?(events, f), do: events |> Enum.find(nil, fn e -> f.(e) end) != nil
 

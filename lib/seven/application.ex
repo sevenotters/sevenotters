@@ -10,11 +10,16 @@ defmodule Seven.Application do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    persistence_opts = Application.get_all_env(:seven)[Seven.Data.Persistence] || [database: "seven_events_#{Mix.env()}", hostname: "127.0.0.1", port: 27_017]
+    persistence_opts =
+      Application.get_all_env(:seven)[Seven.Data.Persistence] ||
+        [database: "seven_events_#{Mix.env()}", hostname: "127.0.0.1", port: 27_017]
 
     # Define workers and child supervisors to be supervised
     children = [
-      worker(Seven.Data.Persistence.current(), [persistence_opts], restart: :permanent, id: :persistence),
+      worker(Seven.Data.Persistence.current(), [persistence_opts],
+        restart: :permanent,
+        id: :persistence
+      ),
       worker(Seven.Entities, [], restart: :permanent, id: :entities),
       worker(Seven.EventStore.EventStore, [], restart: :permanent, id: :event_store),
       supervisor(Seven.BusinessSupervisor, [])

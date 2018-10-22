@@ -39,8 +39,7 @@ config :seven, Seven.Data.Persistence,
   hostname: "127.0.0.1",
   port: 27_017
 
-config :seven, Seven.Log,
-  filter: [:password]
+config :seven, Seven.Log, filter: [:password]
 
 config :logger, backends: [:console, {LoggerFileBackend, :file_log}]
 

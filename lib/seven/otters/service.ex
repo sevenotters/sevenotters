@@ -46,6 +46,7 @@ defmodule Seven.Otters.Service do
       def terminate(:normal, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")
       end
+
       def terminate(reason, state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
         IO.inspect("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
@@ -56,6 +57,7 @@ defmodule Seven.Otters.Service do
         Seven.Log.debug("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         {:noreply, state}
       end
+
       def handle_info(msg, state), do: handle_service_info(msg, state)
 
       # Privates
