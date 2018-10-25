@@ -9,6 +9,8 @@ defmodule Seven.Entities do
   def start_link(opts \\ []) do
     app = @opts[:entity_app]
 
+    Seven.Log.debug("Getting entities from #{app}")
+
     {:ok, modules} = :application.get_key(app, :modules) || {:ok, []}
 
     state = %{
@@ -18,6 +20,8 @@ defmodule Seven.Entities do
       policies: extract_entities(modules, :policy),
       projections: extract_named_entities(modules, :projection)
     }
+
+    Seven.Log.debug("Entities found: #{inspect state}")
 
     GenServer.start_link(__MODULE__, {:ok, state}, opts ++ [name: __MODULE__])
   end

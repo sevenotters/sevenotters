@@ -12,7 +12,7 @@ defmodule Seven.Application do
 
     persistence_opts =
       Application.get_all_env(:seven)[Seven.Data.Persistence] ||
-        [database: "seven_events_#{Mix.env()}", hostname: "127.0.0.1", port: 27_017]
+        [database: "seven_#{Mix.env()}", hostname: "127.0.0.1", port: 27_017]
 
     # Define workers and child supervisors to be supervised
     children = [

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.19.1">
+    <title>Getting started – Seven Otters v0.1.0</title>
+    <link rel="stylesheet" href="dist/app-240d7fc7e5.css" />
+    <script src="dist/sidebar_items-ab0c1bf536.js"></script>
+    
+  </head>
+  <body data-type="extras">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+<div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  <a href="https://www.sevenotters.org" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+Seven Otters      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.1.0
+      </h2>
+    </div>
+      <img src="assets/logo.png" alt="Seven Otters" class="sidebar-projectImage">
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+<h1>Getting started</h1>
+<p>How to start with The Seven Otters to create your first CQRS/ES application.
+The aim of this documentation is to introduce the Seven Otters to developers who want to become familiar with the project.</p>
+<h2 id="requirements" class="section-heading">
+  <a href="#requirements" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Requirements
+</h2>
+
+<p>An instance of MongoDB must be available and receive connections.</p>
+<h2 id="create-and-prepare-a-new-project" class="section-heading">
+  <a href="#create-and-prepare-a-new-project" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Create and prepare a new project
+</h2>
+
+<p>Create a new project</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">my_first_cqrses</span><span class="w"> </span><span class="o">--</span><span class="n">sup</span></code></pre>
+<p>Add <code class="inline">:seven</code> to project dependencies:</p>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defp</span><span class="w"> </span><span class="nf">deps</span><span class="w"> </span><span class="k" data-group-id="9440097942-1">do</span><span class="w">
+</span><span class="p" data-group-id="9440097942-2">[</span><span class="w">
+  </span><span class="p" data-group-id="9440097942-3">{</span><span class="ss">:seven</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;~&gt; 0.1&quot;</span><span class="p" data-group-id="9440097942-3">}</span><span class="w">
+</span><span class="p" data-group-id="9440097942-2">]</span><span class="w">
+</span><span class="k" data-group-id="9440097942-1">end</span></code></pre>
+<p>Update and compile:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="k" data-group-id="3414564006-1">do</span><span class="w"> </span><span class="n">deps</span><span class="o">.</span><span class="n">get</span><span class="p">,</span><span class="w"> </span><span class="n">deps</span><span class="o">.</span><span class="n">compile</span><span class="p">,</span><span class="w"> </span><span class="n">compile</span></code></pre>
+<h2 id="clean-useless-stuff" class="section-heading">
+  <a href="#clean-useless-stuff" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Clean useless stuff
+</h2>
+
+<p>Delete the following files</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">my_first_cqrses</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">my_first_cqrses</span><span class="o">.</span><span class="n">ex</span><span class="w">
+</span><span class="n">my_first_cqrses</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">my_first_cqrses_test</span><span class="o">.</span><span class="n">exs</span></code></pre>
+<h2 id="configure-application" class="section-heading">
+  <a href="#configure-application" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Configure application
+</h2>
+
+<p>Add the following sections to <code class="inline">my_first_cqrses/config/config.exs</code>:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">config</span><span class="w"> </span><span class="ss">:seven</span><span class="p">,</span><span class="w"> </span><span class="nc">Seven.Entities</span><span class="p">,</span><span class="w">
+  </span><span class="ss">entity_app</span><span class="p">:</span><span class="w"> </span><span class="ss">:my_first_cqrses</span><span class="w">
+
+</span><span class="n">config</span><span class="w"> </span><span class="ss">:logger</span><span class="p">,</span><span class="w"> </span><span class="ss">:console</span><span class="p">,</span><span class="w">
+  </span><span class="ss">format</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;$date-$time [$level] $message</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">level</span><span class="p">:</span><span class="w"> </span><span class="ss">:info</span></code></pre>
+<p>The first section indicates in which application all entities (aggregates, projections, etc.) are defined.</p>
+<p>By default, :seven connects to a MongoDB instace running on localhost at port 27017. To change this values add a further section:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">config</span><span class="w"> </span><span class="ss">:seven</span><span class="p">,</span><span class="w"> </span><span class="nc">Seven.Data.Persistence</span><span class="p">,</span><span class="w">
+  </span><span class="ss">database</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_first_cqrses&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">port</span><span class="p">:</span><span class="w"> </span><span class="mi">27_017</span></code></pre>
+<h2 id="create-your-first-aggregate-and-add-a-command" class="section-heading">
+  <a href="#create-your-first-aggregate-and-add-a-command" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Create your first aggregate and add a command
+</h2>
+
+<p>Create a new folder <code class="inline">my_first_cqrses/lib/aggregate</code>.
+Create a new file <code class="inline">my_first_cqrses/lib/aggregate/user.ex</code>.</p>
+<p>Substitute the content of file <code class="inline">my_first_cqrses/lib/aggregate/user.ex</code> with the following code:</p>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">MyFirstCqrses.Aggregate.User</span><span class="w"> </span><span class="k" data-group-id="2512039968-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">Seven.Otters.Aggregate</span><span class="p">,</span><span class="w"> </span><span class="ss">aggregate_field</span><span class="p">:</span><span class="w"> </span><span class="ss">:user</span><span class="w">
+
+  </span><span class="kd">defstruct</span><span class="w"> </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
+            </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="w">
+
+  </span><span class="na">@register_user_command</span><span class="w"> </span><span class="s">&quot;RegisterUser&quot;</span><span class="w">
+  </span><span class="na">@register_user_validation</span><span class="w"> </span><span class="p" data-group-id="2512039968-2">[</span><span class="w">
+    </span><span class="ss">:map</span><span class="p">,</span><span class="w">
+    </span><span class="ss">fields</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2512039968-3">[</span><span class="w">
+      </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2512039968-4">[</span><span class="ss">:string</span><span class="p" data-group-id="2512039968-4">]</span><span class="p">,</span><span class="w">
+      </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2512039968-5">[</span><span class="ss">:string</span><span class="p">,</span><span class="w"> </span><span class="ss">pattern</span><span class="p">:</span><span class="w"> </span><span class="sr">~r/.{8,}/</span><span class="p" data-group-id="2512039968-5">]</span><span class="w">
+    </span><span class="p" data-group-id="2512039968-3">]</span><span class="w">
+  </span><span class="p" data-group-id="2512039968-2">]</span><span class="w">
+
+  </span><span class="na">@user_registered_event</span><span class="w"> </span><span class="s">&quot;UserRegistered&quot;</span><span class="w">
+
+  </span><span class="na">@moduledoc</span><span class="w"> </span><span class="s">&quot;&quot;&quot;
+    User aggregate.
+    Responds to commands:
+    - </span><span class="si" data-group-id="2512039968-6">#{</span><span class="na">@register_user_command</span><span class="si" data-group-id="2512039968-6">}</span><span class="s">
+    &quot;&quot;&quot;</span><span class="w">
+
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">init_state</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p">%</span><span class="bp">__MODULE__</span><span class="p" data-group-id="2512039968-7">{</span><span class="p" data-group-id="2512039968-7">}</span><span class="w">
+
+  </span><span class="na">@spec</span><span class="w"> </span><span class="n">route</span><span class="p" data-group-id="2512039968-8">(</span><span class="nc">String</span><span class="o">.</span><span class="n">t</span><span class="p" data-group-id="2512039968-9">(</span><span class="p" data-group-id="2512039968-9">)</span><span class="p">,</span><span class="w"> </span><span class="n">any</span><span class="p" data-group-id="2512039968-8">)</span><span class="w"> </span><span class="o">::</span><span class="w"> </span><span class="p" data-group-id="2512039968-10">{</span><span class="ss">:routed</span><span class="p">,</span><span class="w"> </span><span class="nc">Map</span><span class="o">.</span><span class="n">y</span><span class="p" data-group-id="2512039968-11">(</span><span class="p" data-group-id="2512039968-11">)</span><span class="p">,</span><span class="w"> </span><span class="n">atom</span><span class="p" data-group-id="2512039968-10">}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p" data-group-id="2512039968-12">{</span><span class="ss">:invalid</span><span class="p">,</span><span class="w"> </span><span class="nc">Map</span><span class="o">.</span><span class="n">t</span><span class="p" data-group-id="2512039968-13">(</span><span class="p" data-group-id="2512039968-13">)</span><span class="p" data-group-id="2512039968-12">}</span><span class="w">
+  </span><span class="kd">def</span><span class="w"> </span><span class="nf">route</span><span class="p" data-group-id="2512039968-14">(</span><span class="na">@register_user_command</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p" data-group-id="2512039968-14">)</span><span class="w"> </span><span class="k" data-group-id="2512039968-15">do</span><span class="w">
+    </span><span class="n">cmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2512039968-16">%{</span><span class="w">
+      </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="n">params</span><span class="p" data-group-id="2512039968-17">[</span><span class="ss">:user</span><span class="p" data-group-id="2512039968-17">]</span><span class="p">,</span><span class="w">
+      </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="n">params</span><span class="p" data-group-id="2512039968-18">[</span><span class="ss">:password</span><span class="p" data-group-id="2512039968-18">]</span><span class="w">
+    </span><span class="p" data-group-id="2512039968-16">}</span><span class="w">
+
+    </span><span class="na">@register_user_command</span><span class="w">
+    </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Seven.Otters.Command</span><span class="o">.</span><span class="n">create</span><span class="p" data-group-id="2512039968-19">(</span><span class="n">cmd</span><span class="p" data-group-id="2512039968-19">)</span><span class="w">
+    </span><span class="o">|&gt;</span><span class="w"> </span><span class="n">validate</span><span class="p" data-group-id="2512039968-20">(</span><span class="na">@register_user_validation</span><span class="p" data-group-id="2512039968-20">)</span><span class="w">
+  </span><span class="k" data-group-id="2512039968-15">end</span><span class="w">
+
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">pre_handle_command</span><span class="p" data-group-id="2512039968-21">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="2512039968-21">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
+
+  </span><span class="na">@spec</span><span class="w"> </span><span class="n">handle_command</span><span class="p" data-group-id="2512039968-22">(</span><span class="nc">Map</span><span class="o">.</span><span class="n">t</span><span class="p" data-group-id="2512039968-23">(</span><span class="p" data-group-id="2512039968-23">)</span><span class="p">,</span><span class="w"> </span><span class="n">any</span><span class="p" data-group-id="2512039968-22">)</span><span class="w"> </span><span class="o">::</span><span class="w"> </span><span class="p" data-group-id="2512039968-24">{</span><span class="ss">:managed</span><span class="p">,</span><span class="w"> </span><span class="nc">List</span><span class="o">.</span><span class="n">t</span><span class="p" data-group-id="2512039968-25">(</span><span class="p" data-group-id="2512039968-25">)</span><span class="p" data-group-id="2512039968-24">}</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_command</span><span class="p" data-group-id="2512039968-26">(</span><span class="p" data-group-id="2512039968-27">%</span><span class="nc" data-group-id="2512039968-27">Seven.Otters.Command</span><span class="p" data-group-id="2512039968-27">{</span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="na">@register_user_command</span><span class="p" data-group-id="2512039968-27">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">command</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p" data-group-id="2512039968-26">)</span><span class="w"> </span><span class="k" data-group-id="2512039968-28">do</span><span class="w">
+    </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2512039968-29">%{</span><span class="w">
+      </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="n">command</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">user</span><span class="p">,</span><span class="w">
+      </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="n">command</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">password</span><span class="w">
+    </span><span class="p" data-group-id="2512039968-29">}</span><span class="w">
+
+    </span><span class="p" data-group-id="2512039968-30">{</span><span class="ss">:managed</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2512039968-31">[</span><span class="n">create_event</span><span class="p" data-group-id="2512039968-32">(</span><span class="na">@user_registered_event</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2512039968-33">%{</span><span class="ss">v1</span><span class="p">:</span><span class="w"> </span><span class="n">event</span><span class="p" data-group-id="2512039968-33">}</span><span class="p" data-group-id="2512039968-32">)</span><span class="p" data-group-id="2512039968-31">]</span><span class="p" data-group-id="2512039968-30">}</span><span class="w">
+  </span><span class="k" data-group-id="2512039968-28">end</span><span class="w">
+
+  </span><span class="na">@spec</span><span class="w"> </span><span class="n">handle_event</span><span class="p" data-group-id="2512039968-34">(</span><span class="nc">Map</span><span class="o">.</span><span class="n">t</span><span class="p" data-group-id="2512039968-35">(</span><span class="p" data-group-id="2512039968-35">)</span><span class="p">,</span><span class="w"> </span><span class="n">any</span><span class="p" data-group-id="2512039968-34">)</span><span class="w"> </span><span class="o">::</span><span class="w"> </span><span class="n">any</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_event</span><span class="p" data-group-id="2512039968-36">(</span><span class="p" data-group-id="2512039968-37">%</span><span class="nc" data-group-id="2512039968-37">Seven.Otters.Event</span><span class="p" data-group-id="2512039968-37">{</span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="na">@user_registered_event</span><span class="p" data-group-id="2512039968-37">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">event</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p" data-group-id="2512039968-36">)</span><span class="w"> </span><span class="k" data-group-id="2512039968-38">do</span><span class="w">
+    </span><span class="p" data-group-id="2512039968-39">%{</span><span class="w">
+      </span><span class="n">state</span><span class="w">
+      </span><span class="o">|</span><span class="w"> </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="n">event</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">user</span><span class="p">,</span><span class="w">
+        </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="n">event</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">password</span><span class="w">
+    </span><span class="p" data-group-id="2512039968-39">}</span><span class="w">
+  </span><span class="k" data-group-id="2512039968-38">end</span><span class="w">
+
+</span><span class="k" data-group-id="2512039968-1">end</span></code></pre>
+<h2 id="test-the-command" class="section-heading">
+  <a href="#test-the-command" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Test the command
+</h2>
+
+<p>Create a new test file <code class="inline">my_first_cqrses/test/user_test.exs</code>.</p>
+<p>Substitute the content of this file with the following code:</p>
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">UserTest</span><span class="w"> </span><span class="k" data-group-id="3489996026-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">ExUnit.Case</span><span class="w">
+
+  </span><span class="n">test</span><span class="w"> </span><span class="s">&quot;register a new user&quot;</span><span class="w"> </span><span class="k" data-group-id="3489996026-2">do</span><span class="w">
+    </span><span class="nc">Seven.EventStore.EventStore</span><span class="o">.</span><span class="n">subscribe</span><span class="p" data-group-id="3489996026-3">(</span><span class="s">&quot;UserRegistered&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="p" data-group-id="3489996026-4">(</span><span class="p" data-group-id="3489996026-4">)</span><span class="p" data-group-id="3489996026-3">)</span><span class="w">
+
+    </span><span class="n">request_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Seven.Data.Persistence</span><span class="o">.</span><span class="n">new_id</span><span class="w">
+
+    </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w">
+      </span><span class="p" data-group-id="3489996026-5">%</span><span class="nc" data-group-id="3489996026-5">Seven.CommandRequest</span><span class="p" data-group-id="3489996026-5">{</span><span class="w">
+        </span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="n">request_id</span><span class="p">,</span><span class="w">
+        </span><span class="ss">command</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RegisterUser&quot;</span><span class="p">,</span><span class="w">
+        </span><span class="ss">sender</span><span class="p">:</span><span class="w"> </span><span class="bp">__MODULE__</span><span class="p">,</span><span class="w">
+        </span><span class="ss">params</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="3489996026-6">%{</span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Paul User&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_difficult_password&quot;</span><span class="p" data-group-id="3489996026-6">}</span><span class="w">
+      </span><span class="p" data-group-id="3489996026-5">}</span><span class="w">
+      </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Seven.CommandBus</span><span class="o">.</span><span class="n">send_command_request</span><span class="p" data-group-id="3489996026-7">(</span><span class="p" data-group-id="3489996026-7">)</span><span class="w">
+
+    </span><span class="n">refute</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="ss">:not_managed</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Command is not managed by anyone&quot;</span><span class="w">
+
+    </span><span class="n">assert_receive</span><span class="w"> </span><span class="p" data-group-id="3489996026-8">%</span><span class="nc" data-group-id="3489996026-8">Seven.Otters.Event</span><span class="p" data-group-id="3489996026-8">{</span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;UserRegistered&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">request_id</span><span class="p">:</span><span class="w"> </span><span class="o">^</span><span class="n">request_id</span><span class="p">,</span><span class="w"> </span><span class="ss">correlation_module</span><span class="p">:</span><span class="w"> </span><span class="nc">MyFirstCqrses.Aggregate.User</span><span class="p" data-group-id="3489996026-8">}</span><span class="w">
+  </span><span class="k" data-group-id="3489996026-2">end</span><span class="w">
+</span><span class="k" data-group-id="3489996026-1">end</span></code></pre>
+<p>Run the test:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="n">test</span></code></pre>
+<h2 id="start-your-application" class="section-heading">
+  <a href="#start-your-application" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Start your application
+</h2>
+
+<p>Start your new application with:</p>
+<pre><code class="nohighlight makeup elixir"><span class="n">mix</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">halt</span><span class="w">
+</span><span class="c1"># or</span><span class="w">
+</span><span class="n">iex</span><span class="w"> </span><span class="o">-</span><span class="nc">S</span><span class="w"> </span><span class="n">mix</span><span class="w"> </span></code></pre>
+<h2 id="congratulation" class="section-heading">
+  <a href="#congratulation" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Congratulation!
+</h2>
+
+<p>Good job! You have just create your first CQRS/ES application in Elixir.</p>
+<h2 id="learn-more" class="section-heading">
+  <a href="#learn-more" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Learn more
+</h2>
+
+<ul>
+<li>Official website: <a href="https://www.sevenotters.org/">https://www.sevenotters.org/</a>
+</li>
+<li>Docs: <a href="https://www.sevenotters.org/">https://hexdocs.pm/seven</a>
+</li>
+<li>Source: <a href="https://www.sevenotters.org/">https://github.com/sevenotters</a>
+</li>
+</ul>
+<h2 id="feedback-requests-help" class="section-heading">
+  <a href="#feedback-requests-help" class="hover-link"><span class="icon-link" aria-hidden="true"></span></a>
+  Feedback, requests, help
+</h2>
+
+<p>For now any communication with the Seven Otters project team is by <a href="https://github.com/sevenotters/sevenotters/pulls">pull requests</a> or at <a href="mailto:seven.otters.project@gmail.com">seven.otters.project@gmail.com</a>.</p>
+<p>If you like the project, any active help (in any form) is absolutly welcome.</p>
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.19.1),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-a0c90688fa.js"></script>
+  
+  </body>
+</html>
+

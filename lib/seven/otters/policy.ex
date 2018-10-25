@@ -25,7 +25,7 @@ defmodule Seven.Otters.Policy do
         {:ok, state}
       end
 
-      def handle_info(%Seven.Event{} = event, state) do
+      def handle_info(%Seven.Otters.Event{} = event, state) do
         Seven.Log.event_received(event, __MODULE__)
 
         handle_event(event)

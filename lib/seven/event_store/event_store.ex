@@ -91,8 +91,8 @@ defmodule Seven.EventStore.EventStore do
   end
 
   def handle_info({:DOWN, ref, :process, pid, reason}, state) do
-    Seven.Log.info(
-      "#{__MODULE__} subscriber DOWN - ref: #{inspect(ref)} - pid: #{inspect(pid)} - reason: #{
+    Seven.Log.debug(
+      "#{__MODULE__} subscriber :DOWN - ref: #{inspect(ref)} - pid: #{inspect(pid)} - reason: #{
         inspect(reason)
       }"
     )
@@ -107,7 +107,7 @@ defmodule Seven.EventStore.EventStore do
 
   defp to_events(events) when is_list(events) do
     events
-    |> Enum.map(fn e -> struct(Seven.Event, AtomicMap.convert(e, safe: false)) end)
+    |> Enum.map(fn e -> struct(Seven.Otters.Event, AtomicMap.convert(e, safe: false)) end)
   end
 
   defp broadcast([], event), do: event

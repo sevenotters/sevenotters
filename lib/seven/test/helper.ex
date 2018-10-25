@@ -3,15 +3,15 @@ defmodule Seven.Test.Helper do
 
   def wait(time \\ 50), do: :timer.sleep(time)
   def unique_name, do: UUID.uuid4(:hex)
-  def unique_email, do: UUID.uuid4(:hex) <> "@wpeaks.ch"
+  def unique_email, do: UUID.uuid4(:hex) <> "@gmail.com"
   def unique_id, do: UUID.uuid4(:hex) |> String.slice(0, 24)
 
   def drop_events do
     ~w{events} |> Seven.Data.Persistence.drop_collections()
   end
 
-  def clean_models do
-    # Some projections/models can be already loaded before cleaning events, clean it
+  def clean_projections do
+    # Projections can be already loaded before cleaning events, clean it
     Seven.Entities.projections() |> Enum.each(fn {_, module} -> module.clean() end)
   end
 

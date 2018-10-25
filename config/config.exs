@@ -27,27 +27,12 @@ config :seven,
   # in minutes
   aggregate_lifetime: 3_600
 
-config :seven, Seven.Endpoint,
-  endpoints: [
-    %{name: "API", cowboy_opts: [port: 4002], route: Seven.Endpoint}
-  ]
-
 # See [docs](https://github.com/ericmj/mongodb/blob/master/lib/mongo.ex)
 # for flags documentation
 config :seven, Seven.Data.Persistence,
   database: "seven_dev",
   hostname: "127.0.0.1",
   port: 27_017
-
-config :seven, Seven.Log, filter: [:password]
-
-config :logger, backends: [:console, {LoggerFileBackend, :file_log}]
-
-config :logger, :console, level: :debug
-
-config :logger, :file_log,
-  path: "log/seven.log",
-  level: :info
 
 config :seven, Seven.Entities,
   entity_app: :seven,

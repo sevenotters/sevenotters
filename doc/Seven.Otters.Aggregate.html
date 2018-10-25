@@ -5,9 +5,9 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.19.1">
-    <title>Seven.Otters.Aggregate – seven v0.1.0</title>
+    <title>Seven.Otters.Aggregate – Seven Otters v0.1.0</title>
     <link rel="stylesheet" href="dist/app-240d7fc7e5.css" />
-    <script src="dist/sidebar_items-8fd2f6f33e.js"></script>
+    <script src="dist/sidebar_items-ab0c1bf536.js"></script>
     
   </head>
   <body data-type="modules">
@@ -23,14 +23,15 @@
 </button>
 <section class="sidebar">
 
-  <a href="api-reference.html" class="sidebar-projectLink">
+  <a href="https://www.sevenotters.org" class="sidebar-projectLink">
     <div class="sidebar-projectDetails">
       <h1 class="sidebar-projectName">
-seven      </h1>
+Seven Otters      </h1>
       <h2 class="sidebar-projectVersion">
         v0.1.0
       </h2>
     </div>
+      <img src="assets/logo.png" alt="Seven Otters" class="sidebar-projectImage">
   </a>
 
   <form class="sidebar-search" action="search.html">
@@ -57,32 +58,39 @@ seven      </h1>
 
 
       <h1>
-        <small class="visible-xs">seven v0.1.0</small>
-Seven.Otters.Aggregate              </h1>
+        <small class="visible-xs">Seven Otters v0.1.0</small>
+Seven.Otters.Aggregate        
+          <a href="https://github.com/sevenotters/blob/master/lib/seven/otters/aggregate.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
 
 
         <section id="moduledoc">
 <p>Provides the <code class="inline">use</code> macro to create an aggregate.</p>
 <p>Example:</p>
-<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">SevenCommerce.Aggregates.User</span><span class="w"> </span><span class="k" data-group-id="7953407189-1">do</span><span class="w">
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">SevenCommerce.Aggregates.User</span><span class="w"> </span><span class="k" data-group-id="6530231822-1">do</span><span class="w">
   </span><span class="kn">use</span><span class="w"> </span><span class="nc">Seven.Otters.Aggregate</span><span class="p">,</span><span class="w"> </span><span class="ss">aggregate_field</span><span class="p">:</span><span class="w"> </span><span class="ss">:id</span><span class="w">
 
   </span><span class="kd">defstruct</span><span class="w"> </span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
             </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
             </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
-            </span><span class="ss">cart</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="7953407189-2">[</span><span class="p" data-group-id="7953407189-2">]</span><span class="w">
+            </span><span class="ss">cart</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6530231822-2">[</span><span class="p" data-group-id="6530231822-2">]</span><span class="w">
 
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">init_state</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p">%</span><span class="bp">__MODULE__</span><span class="p" data-group-id="7953407189-3">{</span><span class="p" data-group-id="7953407189-3">}</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">init_state</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p">%</span><span class="bp">__MODULE__</span><span class="p" data-group-id="6530231822-3">{</span><span class="p" data-group-id="6530231822-3">}</span><span class="w">
 
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">pre_handle_command</span><span class="p" data-group-id="7953407189-4">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="7953407189-4">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_command</span><span class="p" data-group-id="7953407189-5">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="7953407189-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="7953407189-6">{</span><span class="ss">:managed</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7953407189-7">[</span><span class="p" data-group-id="7953407189-7">]</span><span class="p" data-group-id="7953407189-6">}</span><span class="w">
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_event</span><span class="p" data-group-id="7953407189-8">(</span><span class="c">_event</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p" data-group-id="7953407189-8">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="w">
-</span><span class="k" data-group-id="7953407189-1">end</span></code></pre>
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">pre_handle_command</span><span class="p" data-group-id="6530231822-4">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="6530231822-4">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_command</span><span class="p" data-group-id="6530231822-5">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="6530231822-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6530231822-6">{</span><span class="ss">:managed</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6530231822-7">[</span><span class="p" data-group-id="6530231822-7">]</span><span class="p" data-group-id="6530231822-6">}</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_event</span><span class="p" data-group-id="6530231822-8">(</span><span class="c">_event</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p" data-group-id="6530231822-8">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="w">
+</span><span class="k" data-group-id="6530231822-1">end</span></code></pre>
 <p>Module must declare the use of <a href="Seven.Otters.Aggregate.html#content"><code class="inline">Seven.Otters.Aggregate</code></a> module, specifying the field to use as correlation id;
 the field must be present in module structure:</p>
 <pre><code class="nohighlight makeup elixir"><span class="kn">use</span><span class="w"> </span><span class="nc">Seven.Otters.Aggregate</span><span class="p">,</span><span class="w"> </span><span class="ss">aggregate_field</span><span class="p">:</span><span class="w"> </span><span class="ss">:id</span><span class="w">
 
-</span><span class="kd">defstruct</span><span class="w"> </span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w"> </span><span class="n">...</span></code></pre>
+</span><span class="kd">defstruct</span><span class="w"> </span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
+          </span><span class="n">...</span></code></pre>
+<p>Some function must be implemented in the aggregate. </p>
         </section>
 
 

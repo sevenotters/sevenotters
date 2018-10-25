@@ -164,7 +164,7 @@ defmodule Seven.Sync.ApiCommandRouter do
 
       defp wait_for_one_of_events(request_id, events, incoming_events) do
         receive do
-          %Seven.Event{request_id: ^request_id} = e ->
+          %Seven.Otters.Event{request_id: ^request_id} = e ->
             if e.type not in events do
               wait_for_one_of_events(request_id, events, incoming_events)
             else

@@ -8,7 +8,13 @@ defmodule Seven.Mixfile do
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      name: "Seven Otters",
+      source_url: "https://github.com/sevenotters",
+      homepage_url: "https://www.sevenotters.org",
+      docs: docs()
     ]
   end
 
@@ -18,6 +24,14 @@ defmodule Seven.Mixfile do
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
     [extra_applications: [:logger], mod: {Seven.Application, []}]
+  end
+
+  defp docs do
+    [
+      main: "getting_started",
+      logo: "markdown/icon.png",
+      extras: ["markdown/getting_started.md"]
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -36,7 +50,6 @@ defmodule Seven.Mixfile do
       {:cors_plug, "== 1.5.2"},
       {:credo, "== 0.10.2", only: :dev, runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:logger_file_backend, "== 0.0.10"},
       {:mongodb, "== 0.4.7"},
       {:plug, "== 1.7.0"},
       {:poison, "== 4.0.1"},
