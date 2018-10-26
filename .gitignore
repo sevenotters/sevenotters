@@ -19,3 +19,5 @@ erl_crash.dump
 *.ez
 
 /log
+
+*.tar

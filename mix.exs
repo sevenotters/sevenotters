@@ -14,7 +14,11 @@ defmodule Seven.Mixfile do
       name: "Seven Otters",
       source_url: "https://github.com/sevenotters",
       homepage_url: "https://www.sevenotters.org",
-      docs: docs()
+      docs: docs(),
+
+      # Package
+      description: "Seven Otters is a set of facilities (macroes, functions, modules, etc.) developed to create CQRS/ES solutions in Elixir on BEAM virtual machine.",
+      package: package()
     ]
   end
 
@@ -31,6 +35,15 @@ defmodule Seven.Mixfile do
       main: "getting_started",
       logo: "markdown/icon.png",
       extras: ["markdown/getting_started.md"]
+    ]
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      maintainers: ["Nicola Fiorillo"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/sevenotters/sevenotters"}
     ]
   end
 

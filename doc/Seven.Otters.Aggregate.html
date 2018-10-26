@@ -7,7 +7,8 @@
     <meta name="generator" content="ExDoc v0.19.1">
     <title>Seven.Otters.Aggregate – Seven Otters v0.1.0</title>
     <link rel="stylesheet" href="dist/app-240d7fc7e5.css" />
-    <script src="dist/sidebar_items-ab0c1bf536.js"></script>
+      <link rel="canonical" href="https://hexdocs.pm/seven/Seven.Otters.Aggregate.html" />
+    <script src="dist/sidebar_items-0c05267d00.js"></script>
     
   </head>
   <body data-type="modules">
@@ -70,20 +71,20 @@ Seven.Otters.Aggregate
         <section id="moduledoc">
 <p>Provides the <code class="inline">use</code> macro to create an aggregate.</p>
 <p>Example:</p>
-<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">SevenCommerce.Aggregates.User</span><span class="w"> </span><span class="k" data-group-id="6530231822-1">do</span><span class="w">
+<pre><code class="nohighlight makeup elixir"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">SevenCommerce.Aggregates.User</span><span class="w"> </span><span class="k" data-group-id="2983408952-1">do</span><span class="w">
   </span><span class="kn">use</span><span class="w"> </span><span class="nc">Seven.Otters.Aggregate</span><span class="p">,</span><span class="w"> </span><span class="ss">aggregate_field</span><span class="p">:</span><span class="w"> </span><span class="ss">:id</span><span class="w">
 
   </span><span class="kd">defstruct</span><span class="w"> </span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
             </span><span class="ss">user</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
             </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="no">nil</span><span class="p">,</span><span class="w">
-            </span><span class="ss">cart</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6530231822-2">[</span><span class="p" data-group-id="6530231822-2">]</span><span class="w">
+            </span><span class="ss">cart</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2983408952-2">[</span><span class="p" data-group-id="2983408952-2">]</span><span class="w">
 
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">init_state</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p">%</span><span class="bp">__MODULE__</span><span class="p" data-group-id="6530231822-3">{</span><span class="p" data-group-id="6530231822-3">}</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">init_state</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p">%</span><span class="bp">__MODULE__</span><span class="p" data-group-id="2983408952-3">{</span><span class="p" data-group-id="2983408952-3">}</span><span class="w">
 
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">pre_handle_command</span><span class="p" data-group-id="6530231822-4">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="6530231822-4">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_command</span><span class="p" data-group-id="6530231822-5">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="6530231822-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6530231822-6">{</span><span class="ss">:managed</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6530231822-7">[</span><span class="p" data-group-id="6530231822-7">]</span><span class="p" data-group-id="6530231822-6">}</span><span class="w">
-  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_event</span><span class="p" data-group-id="6530231822-8">(</span><span class="c">_event</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p" data-group-id="6530231822-8">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="w">
-</span><span class="k" data-group-id="6530231822-1">end</span></code></pre>
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">pre_handle_command</span><span class="p" data-group-id="2983408952-4">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="2983408952-4">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="ss">:ok</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_command</span><span class="p" data-group-id="2983408952-5">(</span><span class="c">_command</span><span class="p">,</span><span class="w"> </span><span class="c">_state</span><span class="p" data-group-id="2983408952-5">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="2983408952-6">{</span><span class="ss">:managed</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2983408952-7">[</span><span class="p" data-group-id="2983408952-7">]</span><span class="p" data-group-id="2983408952-6">}</span><span class="w">
+  </span><span class="kd">defp</span><span class="w"> </span><span class="nf">handle_event</span><span class="p" data-group-id="2983408952-8">(</span><span class="c">_event</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p" data-group-id="2983408952-8">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="n">state</span><span class="w">
+</span><span class="k" data-group-id="2983408952-1">end</span></code></pre>
 <p>Module must declare the use of <a href="Seven.Otters.Aggregate.html#content"><code class="inline">Seven.Otters.Aggregate</code></a> module, specifying the field to use as correlation id;
 the field must be present in module structure:</p>
 <pre><code class="nohighlight makeup elixir"><span class="kn">use</span><span class="w"> </span><span class="nc">Seven.Otters.Aggregate</span><span class="p">,</span><span class="w"> </span><span class="ss">aggregate_field</span><span class="p">:</span><span class="w"> </span><span class="ss">:id</span><span class="w">
