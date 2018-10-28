@@ -2,7 +2,14 @@
 
 **A CQRS/ES Starter Kit for the BEAM.**
 
-To do (in sparse order):
+## Getting Started
+
+Refer to [Getting Started](https://hexdocs.pm/seven/getting_started.html) to have your first CQRS/ES application with Seven Otters.
+
+## To do
+
+With no order:
+
 - [x] Event store
     - [x] MongoDb support
     - [ ] Abstract for different stores beyond Mongo 
@@ -30,4 +37,4 @@ To do (in sparse order):
 - [ ] Authorization support (to a different project as helper library)
 
 ## Feedback
-Feel free to send feedback to [seven.otters.project@gmail.com](seven.otters.project@gmail.com)
+Feel free to send feedback to <seven.otters.project@gmail.com>
