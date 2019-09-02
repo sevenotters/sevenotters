@@ -4,18 +4,19 @@ defmodule Seven.Data.Mongo do
   @moduledoc false
 
   @bson_value_format ~r/^[A-Fa-f0-9\-]{24}$/
+  @pool_size  10
 
   def init(args), do: {:ok, args}
 
   def start_link(opts \\ []) do
     database = opts[:database]
     Seven.Log.info("Persistence is Mongo (#{opts[:hostname]}:#{opts[:port]}/#{database})")
-    Mongo.start_link(opts ++ [name: __MODULE__, pool: DBConnection.Poolboy])
+    Mongo.start_link(opts ++ [name: __MODULE__, pool_size: @pool_size])
   end
 
   @spec insert(String.t(), Map.t()) :: any
   def insert(collection, value) do
-    {:ok, _id} = Mongo.insert_one(__MODULE__, collection, value, pool: DBConnection.Poolboy)
+    {:ok, _id} = Mongo.insert_one(__MODULE__, collection, value)
   end
 
   @spec new_id :: Map.t()
@@ -42,8 +43,7 @@ defmodule Seven.Data.Mongo do
       collection,
       %{},
       sort: %{field => -1},
-      limit: 1,
-      pool: DBConnection.Poolboy
+      limit: 1
     )
     |> Enum.to_list()
     |> calculate_max(Atom.to_string(field))
@@ -51,7 +51,7 @@ defmodule Seven.Data.Mongo do
 
   @spec content_of(String.t(), Map.t(), Map.t()) :: List.t()
   def content_of(collection, filter, sort) do
-    Mongo.find(__MODULE__, collection, filter, sort: sort, pool: DBConnection.Poolboy)
+    Mongo.find(__MODULE__, collection, filter, sort: sort)
     |> Enum.to_list()
   end
 

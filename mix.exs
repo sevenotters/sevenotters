@@ -58,18 +58,18 @@ defmodule Seven.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:atomic_map, "== 0.9.3"},
-      {:bunt, "== 0.2.0"},
-      {:cors_plug, "== 1.5.2"},
-      {:credo, "== 0.10.2", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:mongodb, "== 0.4.7"},
-      {:plug, "== 1.7.0"},
-      {:poison, "== 4.0.1"},
-      {:poolboy, "== 1.5.1"},
-      {:timex, "== 3.4.1"},
-      {:uuid, "== 1.1.8"},
-      {:ve, "== 0.1.9"}
+      {:atomic_map, "~> 0.9.3"},
+      {:bunt, "~> 0.2.0"},
+      {:cors_plug, "~> 2.0"},
+      {:credo, "~> 1.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:mongodb, "~> 0.5"},
+      {:plug, "~> 1.8"},
+      {:poison, "~> 4.0"},
+      {:poolboy, "~> 1.5"},
+      {:timex, "~> 3.6"},
+      {:uuid, "~> 1.1.8"},
+      {:ve, "~> 0.1"}
     ]
   end
 end
