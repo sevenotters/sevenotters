@@ -32,10 +32,7 @@ defmodule Seven.Sync.ApiQueryRouter do
 
       defp filter_data(%ApiRequest{} = req), do: req
 
-      defp send_query_request(
-             %ApiRequest{state: :unmanaged, projection: projection, query: query, params: params} =
-               req
-           ) do
+      defp send_query_request(%ApiRequest{state: :unmanaged, projection: projection, query: query, params: params} = req) do
         with {:ok, module} <- Seven.Projections.get_projection(projection),
              {:ok, data} <- module.query(query, params) do
           %ApiRequest{req | state: :managed, response: data}
@@ -55,10 +52,8 @@ defmodule Seven.Sync.ApiQueryRouter do
 
         if p[:authentication] |> is_not_nil do
           quote do
-            defp apply_authentication(
-                   %ApiRequest{state: :unmanaged, projection: unquote(p[:projection])} = req
-                 ),
-                 do: unquote(p[:authentication]).(req)
+            defp apply_authentication(%ApiRequest{state: :unmanaged, projection: unquote(p[:projection])} = req),
+              do: unquote(p[:authentication]).(req)
           end
         end
       end

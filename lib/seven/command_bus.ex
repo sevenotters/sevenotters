@@ -56,11 +56,7 @@ defmodule Seven.CommandBus do
   end
 
   defp log_routing(%RequestInfo{managed: :routed} = request_info) do
-    Seven.Log.debug(
-      "Command #{request_info.command_request.command} routed by #{request_info.handler}: #{
-        inspect(request_info.command)
-      }"
-    )
+    Seven.Log.debug("Command #{request_info.command_request.command} routed by #{request_info.handler}: #{inspect(request_info.command)}")
 
     request_info
   end
@@ -71,9 +67,7 @@ defmodule Seven.CommandBus do
   end
 
   defp log_routing(%RequestInfo{managed: {_, reason}} = request_info) do
-    Seven.Log.debug(
-      "Command #{request_info.command_request.command} routed but invalid: #{inspect(reason)}"
-    )
+    Seven.Log.debug("Command #{request_info.command_request.command} routed but invalid: #{inspect(reason)}")
 
     request_info
   end
@@ -84,8 +78,7 @@ defmodule Seven.CommandBus do
   defp dispatch_command(%RequestInfo{managed: :routed, handler_type: :aggregate} = request_info) do
     case Map.fetch(request_info.command.payload, request_info.handler.aggregate_field) do
       {:ok, persistence_correlation_value_id} ->
-        correlation_value_id =
-          Seven.Data.Persistence.printable_id(persistence_correlation_value_id)
+        correlation_value_id = Seven.Data.Persistence.printable_id(persistence_correlation_value_id)
 
         {:ok, pid} = Seven.Aggregates.get_aggregate(request_info.handler, correlation_value_id)
         Seven.Log.command_received(request_info.command)
@@ -93,11 +86,7 @@ defmodule Seven.CommandBus do
         request_info.handler.command(pid, request_info.command)
 
       :error ->
-        Seven.Log.error(
-          "Error applying command #{request_info.command.type}: missing #{
-            request_info.handler.aggregate_field
-          } in #{inspect(request_info.command.payload)}"
-        )
+        Seven.Log.error("Error applying command #{request_info.command.type}: missing #{request_info.handler.aggregate_field} in #{inspect(request_info.command.payload)}")
 
         :not_managed
     end

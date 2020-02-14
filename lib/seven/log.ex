@@ -19,9 +19,7 @@ defmodule Seven.Log do
     if Application.get_env(:seven, :print_commands) do
       Bunt.puts([
         :steelblue,
-        "#{command.request_id}: [cr] #{command.type} - received by: #{command.responder_module}, payload: #{
-          command.payload |> filter_data() |> inspect
-        }"
+        "#{command.request_id}: [cr] #{command.type} - received by: #{command.responder_module}, payload: #{command.payload |> filter_data() |> inspect}"
       ])
     end
 
@@ -33,9 +31,7 @@ defmodule Seven.Log do
     if Application.get_env(:seven, :print_commands) do
       Bunt.puts([
         :steelblue,
-        "________________________________: [cs] #{request.command} - sent by: #{request.sender}, params: #{
-          request.command.payload |> filter_data() |> inspect
-        }"
+        "________________________________: [cs] #{request.command} - sent by: #{request.sender}, params: #{request.command.payload |> filter_data() |> inspect}"
       ])
     end
 
@@ -47,12 +43,8 @@ defmodule Seven.Log do
     if Application.get_env(:seven, :print_events) do
       Bunt.puts([
         :orange,
-        "#{Seven.Data.Persistence.printable_id(event.request_id)}: [er] #{event.type} - received by: #{
-          module
-        },
-        id: \"#{Seven.Data.Persistence.printable_id(event.correlation_id)}\", payload: #{
-          event.payload |> filter_data() |> inspect
-        }"
+        "#{Seven.Data.Persistence.printable_id(event.request_id)}: [er] #{event.type} - received by: #{module},
+        id: \"#{Seven.Data.Persistence.printable_id(event.correlation_id)}\", payload: #{event.payload |> filter_data() |> inspect}"
       ])
     end
 
@@ -64,12 +56,8 @@ defmodule Seven.Log do
     if Application.get_env(:seven, :print_events) do
       Bunt.puts([
         :orange,
-        "#{Seven.Data.Persistence.printable_id(event.request_id)}: [ef] #{event.type} - fired by: #{
-          event.correlation_module
-        },
-        id: \"#{Seven.Data.Persistence.printable_id(event.correlation_id)}\", payload: #{
-          event.payload |> filter_data() |> inspect
-        }"
+        "#{Seven.Data.Persistence.printable_id(event.request_id)}: [ef] #{event.type} - fired by: #{event.correlation_module},
+        id: \"#{Seven.Data.Persistence.printable_id(event.correlation_id)}\", payload: #{event.payload |> filter_data() |> inspect}"
       ])
     end
 

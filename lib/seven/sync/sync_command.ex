@@ -23,28 +23,20 @@ defmodule Seven.Sync.SyncCommand do
 
   defp wait_events(%SyncCommandRequest{} = req), do: req
 
-  defp subscribe_to_event_store(
-         %SyncCommandRequest{state: :unmanaged, wait_for_events: []} = req
-       ),
-       do: req
+  defp subscribe_to_event_store(%SyncCommandRequest{state: :unmanaged, wait_for_events: []} = req),
+    do: req
 
-  defp subscribe_to_event_store(
-         %SyncCommandRequest{state: :unmanaged, wait_for_events: wait_for_events} = req
-       ) do
+  defp subscribe_to_event_store(%SyncCommandRequest{state: :unmanaged, wait_for_events: wait_for_events} = req) do
     wait_for_events |> Enum.each(&EventStore.subscribe(&1, self()))
     req
   end
 
   defp subscribe_to_event_store(%SyncCommandRequest{} = req), do: req
 
-  defp unsubscribe_to_event_store(
-         %SyncCommandRequest{state: :managed, wait_for_events: []} = req
-       ),
-       do: req
+  defp unsubscribe_to_event_store(%SyncCommandRequest{state: :managed, wait_for_events: []} = req),
+    do: req
 
-  defp unsubscribe_to_event_store(
-         %SyncCommandRequest{state: :managed, wait_for_events: wait_for_events} = req
-       ) do
+  defp unsubscribe_to_event_store(%SyncCommandRequest{state: :managed, wait_for_events: wait_for_events} = req) do
     wait_for_events |> Enum.each(&EventStore.unsubscribe(&1, self()))
     req
   end

@@ -20,7 +20,7 @@ defmodule Seven.BusinessSupervisor do
     processes = Seven.Entities.processes() |> additional_workers()
     projections = Seven.Entities.projections() |> Map.values() |> additional_workers()
 
-    supervise(
+    Supervisor.init(
       policies ++ services ++ processes ++ registry ++ projections,
       opts
     )

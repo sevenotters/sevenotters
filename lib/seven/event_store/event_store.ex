@@ -12,8 +12,7 @@ defmodule Seven.EventStore.EventStore do
   # API
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
-    next_counter =
-      Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
+    next_counter = Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
 
     Seven.Log.debug("Next event counter: #{next_counter}")
 
@@ -91,11 +90,7 @@ defmodule Seven.EventStore.EventStore do
   end
 
   def handle_info({:DOWN, ref, :process, pid, reason}, state) do
-    Seven.Log.debug(
-      "#{__MODULE__} subscriber :DOWN - ref: #{inspect(ref)} - pid: #{inspect(pid)} - reason: #{
-        inspect(reason)
-      }"
-    )
+    Seven.Log.debug("#{__MODULE__} subscriber :DOWN - ref: #{inspect(ref)} - pid: #{inspect(pid)} - reason: #{inspect(reason)}")
 
     {:noreply, State.pid_is_down(state, pid)}
   end

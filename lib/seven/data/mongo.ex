@@ -4,7 +4,7 @@ defmodule Seven.Data.Mongo do
   @moduledoc false
 
   @bson_value_format ~r/^[A-Fa-f0-9\-]{24}$/
-  @pool_size  10
+  @pool_size 10
 
   def init(args), do: {:ok, args}
 

@@ -121,11 +121,7 @@ defmodule Seven.Otters.Aggregate do
           true ->
             {:ok, aggr_field} = Map.fetch(state.internal_state, aggregate_field())
 
-            Seven.Log.debug(
-              "Closing aggregate #{__MODULE__} for #{minutes} minutes of inactivity (#{
-                aggregate_field()
-              }: #{aggr_field})."
-            )
+            Seven.Log.debug("Closing aggregate #{__MODULE__} for #{minutes} minutes of inactivity (#{aggregate_field()}: #{aggr_field}).")
 
             {:stop, :normal, state}
 

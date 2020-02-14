@@ -7,9 +7,7 @@ defmodule Seven.Utils.ListOfMaps do
       def update_item(items, key_func, values) when is_list(values) do
         case items |> Enum.find_index(key_func) do
           nil ->
-            Seven.Log.error(
-              "#{__MODULE__} is searching for unexisting item; func_key: #{inspect(key_func)}"
-            )
+            Seven.Log.error("#{__MODULE__} is searching for unexisting item; func_key: #{inspect(key_func)}")
 
             items
 
@@ -28,9 +26,7 @@ defmodule Seven.Utils.ListOfMaps do
       def update_item(items, key_func, func) when is_function(func, 1) do
         case items |> Enum.find_index(key_func) do
           nil ->
-            Seven.Log.error(
-              "#{__MODULE__} is searching for unexisting item; func_key: #{inspect(key_func)}"
-            )
+            Seven.Log.error("#{__MODULE__} is searching for unexisting item; func_key: #{inspect(key_func)}")
 
             items
 

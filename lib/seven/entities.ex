@@ -21,7 +21,7 @@ defmodule Seven.Entities do
       projections: extract_named_entities(modules, :projection)
     }
 
-    Seven.Log.debug("Entities found: #{inspect state}")
+    Seven.Log.debug("Entities found: #{inspect(state)}")
 
     GenServer.start_link(__MODULE__, {:ok, state}, opts ++ [name: __MODULE__])
   end
