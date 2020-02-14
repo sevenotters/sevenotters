@@ -64,7 +64,7 @@ defmodule Seven.Mixfile do
       {:credo, "~> 1.1", only: :dev, runtime: false},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},
       {:mongodb, "~> 0.5"},
-      {:plug, "~> 1.8"},
+      {:plug, "~> 1.9"},
       {:poison, "~> 4.0"},
       {:poolboy, "~> 1.5"},
       {:timex, "~> 3.6"},
