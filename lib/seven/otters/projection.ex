@@ -74,11 +74,9 @@ defmodule Seven.Otters.Projection do
 
       def terminate(reason, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
-        IO.inspect("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
       end
 
       def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
-        IO.inspect("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         Seven.Log.debug("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         {:noreply, state}
       end

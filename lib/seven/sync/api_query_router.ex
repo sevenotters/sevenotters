@@ -1,4 +1,6 @@
 defmodule Seven.Sync.ApiQueryRouter do
+  @moduledoc false
+
   defp is_not_nil(arg), do: not is_nil(arg)
 
   defmacro __using__(post: post) do

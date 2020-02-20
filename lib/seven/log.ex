@@ -7,7 +7,6 @@ defmodule Seven.Log do
 
   def debug(msg) when is_bitstring(msg) do
     Logger.debug(fn -> msg end)
-    # IO.inspect msg
   end
 
   def info(msg) when is_bitstring(msg), do: Logger.info(fn -> msg end)

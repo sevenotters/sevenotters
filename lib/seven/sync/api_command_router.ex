@@ -1,4 +1,6 @@
 defmodule Seven.Sync.ApiCommandRouter do
+  @moduledoc false
+
   defp is_not_nil(arg), do: not is_nil(arg)
 
   defmacro __using__(post: post) do
@@ -149,10 +151,10 @@ defmodule Seven.Sync.ApiCommandRouter do
       defp wait_for_one_of_events(request_id, events, incoming_events) do
         receive do
           %Seven.Otters.Event{request_id: ^request_id} = e ->
-            if e.type not in events do
-              wait_for_one_of_events(request_id, events, incoming_events)
-            else
+            if e.type in events do
               incoming_events ++ [e]
+            else
+              wait_for_one_of_events(request_id, events, incoming_events)
             end
 
           _ ->

@@ -1,4 +1,6 @@
 defmodule Seven.Sync.EndpointApiQueryRouter do
+  @moduledoc false
+
   defmacro __using__(conn: conn, posts: posts) do
     quote location: :keep do
       use Plug.Router

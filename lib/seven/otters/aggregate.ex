@@ -27,7 +27,7 @@ defmodule Seven.Otters.Aggregate do
       defstruct id: nil,
                 ...
 
-  Some function must be implemented in the aggregate. 
+  Some function must be implemented in the aggregate.
   """
 
   defmacro __using__(aggregate_field: aggregate_field) do
@@ -105,11 +105,9 @@ defmodule Seven.Otters.Aggregate do
 
       def terminate(reason, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
-        IO.inspect("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
       end
 
       def handle_info({:DOWN, _ref, :process, pid, reason}, state) do
-        IO.inspect("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         Seven.Log.debug("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         {:noreply, state}
       end

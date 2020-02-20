@@ -1,4 +1,6 @@
 defmodule Seven.Sync.SyncCommand do
+  @moduledoc false
+
   alias Seven.Sync.SyncCommandRequest
   alias Seven.EventStore.EventStore
 
@@ -74,10 +76,10 @@ defmodule Seven.Sync.SyncCommand do
   defp wait_for_one_of_events(request_id, events, incoming_events) do
     receive do
       %Seven.Otters.Event{request_id: ^request_id} = e ->
-        if e.type not in events do
-          wait_for_one_of_events(request_id, events, incoming_events)
-        else
+        if e.type in events do
           incoming_events ++ [e]
+        else
+          wait_for_one_of_events(request_id, events, incoming_events)
         end
 
       _ ->
