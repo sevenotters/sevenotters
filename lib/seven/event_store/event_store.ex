@@ -16,10 +16,7 @@ defmodule Seven.EventStore.EventStore do
 
     Seven.Log.debug("Next event counter: #{next_counter}")
 
-    GenServer.start_link(
-      __MODULE__,
-      {:ok, Persistence.max_in_collection(@events_collection, @counter_field) + 1},
-      opts ++ [name: __MODULE__]
+    GenServer.start_link(__MODULE__, {:ok, next_counter}, opts ++ [name: __MODULE__]
     )
   end
 
