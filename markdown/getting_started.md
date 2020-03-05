@@ -108,6 +108,8 @@ defmodule MyFirstCqrses.Aggregate.User do
     |> validate(@register_user_validation)
   end
 
+  def route(_command, _params), do: :not_routed
+
   defp pre_handle_command(_command, _state), do: :ok
 
   @spec handle_command(Map.t(), any) :: {:managed, List.t()}
