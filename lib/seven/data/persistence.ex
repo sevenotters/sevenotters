@@ -1,5 +1,5 @@
 defmodule Seven.Data.Persistence do
-  @persistence Seven.Data.Mongo
+  @persistence Seven.Data.Storage.Mongo
 
   @moduledoc false
 

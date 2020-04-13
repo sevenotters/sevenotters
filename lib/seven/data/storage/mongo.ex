@@ -1,12 +1,10 @@
-defmodule Seven.Data.Mongo do
-  use GenServer
-
+defmodule Seven.Data.Storage.Mongo do
   @moduledoc false
+
+  @behaviour Seven.Data.Storage
 
   @bson_value_format ~r/^[A-Fa-f0-9\-]{24}$/
   @pool_size 10
-
-  def init(args), do: {:ok, args}
 
   def start_link(opts \\ []) do
     database = opts[:database]
@@ -14,7 +12,7 @@ defmodule Seven.Data.Mongo do
     Mongo.start_link(opts ++ [name: __MODULE__, pool_size: @pool_size])
   end
 
-  @spec insert(String.t(), Map.t()) :: any
+  @spec insert(String.t(), Map.t()) :: {:ok, any}
   def insert(collection, value) do
     {:ok, _id} = Mongo.insert_one(__MODULE__, collection, value)
   end
