@@ -13,11 +13,9 @@ defmodule Seven.EventStore.EventStore do
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
     next_counter = Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
-
     Seven.Log.debug("Next event counter: #{next_counter}")
 
-    GenServer.start_link(__MODULE__, {:ok, next_counter}, opts ++ [name: __MODULE__]
-    )
+    GenServer.start_link(__MODULE__, {:ok, next_counter}, opts ++ [name: __MODULE__])
   end
 
   @spec subscribe(String.t(), pid) :: any
@@ -41,7 +39,7 @@ defmodule Seven.EventStore.EventStore do
   @spec events_by(Map.t()) :: List.t()
   def events_by(filter) when is_map(filter), do: GenServer.call(__MODULE__, {:events_by, filter})
 
-  @spec events_by_types(List.t()) :: List.t()
+  @spec events_by_types([String.t()]) :: List.t()
   def events_by_types(types), do: GenServer.call(__MODULE__, {:events_by_types, types})
 
   # Callbacks
@@ -64,13 +62,16 @@ defmodule Seven.EventStore.EventStore do
   end
 
   def handle_call({:events_by, filter}, _from, state) do
-    events = Persistence.content_of(@events_collection, filter, %{counter: 1}) |> to_events
+    sort_expression = Persistence.sort_expression()
+    events = Persistence.content_of(@events_collection, filter, sort_expression) |> to_events
     {:reply, events, state}
   end
 
   def handle_call({:events_by_types, types}, _from, state) do
+    type_expression = Persistence.type_expression(types)
+    sort_expression = Persistence.sort_expression()
     events =
-      Persistence.content_of(@events_collection, %{type: %{"$in" => types}}, %{counter: 1})
+      Persistence.content_of(@events_collection, type_expression, sort_expression)
       |> to_events
 
     {:reply, events, state}

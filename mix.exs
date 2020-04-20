@@ -4,7 +4,7 @@ defmodule Seven.Mixfile do
   def project do
     [
       app: :seven,
-      version: "0.1.2",
+      version: "0.2.0",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -47,26 +47,18 @@ defmodule Seven.Mixfile do
     ]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:my_dep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:my_dep, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:atomic_map, "~> 0.9.3"},
-      {:bunt, "~> 0.2.0"},
+      {:atomic_map, "~> 0.9"},
+      {:bunt, "~> 0.2"},
       {:cors_plug, "~> 2.0"},
-      {:credo, "~> 1.1", only: :dev, runtime: false},
+      {:credo, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},
-      {:mongodb, "~> 0.5"},
-      {:plug, "~> 1.9"},
+      {:plug, "~> 1.10"},
       {:poison, "~> 4.0"},
       {:poolboy, "~> 1.5"},
+      {:sevenotters_persistence, "~> 0.1"},
+      {:sevenotters_mongo, "~> 0.1"},
       {:timex, "~> 3.6"},
       {:uuid, "~> 1.1.8"},
       {:ve, "~> 0.1"}
