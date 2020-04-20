@@ -3,10 +3,6 @@
 How to start with The Seven Otters to create your first CQRS/ES application.
 The aim of this documentation is to introduce the Seven Otters to developers who want to become familiar with the project.
 
-## Requirements
-
-An instance of MongoDB must be available and able to receive connections.
-
 ## Create and prepare a new project
 
 Create a new project:
@@ -55,7 +51,15 @@ config :logger, :console,
 
 The first section indicates in which application all entities (aggregates, projections, etc.) are defined.
 
-By default, ``:seven`` connects to a MongoDB instace running on localhost at port 27017. To change this values add a further section:
+By default Seven Otters uses in memory (and volatile!) event store: events remain in memory and they are lost ending application.
+To use MongoDB as permanet persistence, add to your configuration:
+
+```elixir
+config :seven,
+  persistence: SevenottersMongo.Storage
+```
+
+and configure the connection:
 
 ```elixir
 config :seven, Seven.Data.Persistence,

@@ -12,7 +12,7 @@ With no order:
 
 - [x] Event store
     - [x] MongoDb support
-    - [ ] Abstract for different stores beyond Mongo 
+    - [x] Abstract for different stores beyond Mongo 
 - [x] Event structure
 - [x] Command
 - [x] Command bus
