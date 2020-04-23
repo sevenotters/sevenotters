@@ -1,7 +1,7 @@
 defmodule Seven.Otters.Command do
   @moduledoc false
 
-  defstruct _id: nil,
+  defstruct id: nil,
             type: nil,
             request_id: nil,
             responder_module: nil,
@@ -11,7 +11,7 @@ defmodule Seven.Otters.Command do
   def create(type, payload) do
     struct(
       %__MODULE__{},
-      _id: Seven.Data.Persistence.new_id(),
+      id: Seven.Data.Persistence.new_id(),
       type: type,
       payload: payload
     )

@@ -10,9 +10,7 @@ defmodule Seven.Application do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    persistence_opts =
-      Application.get_all_env(:seven)[Seven.Data.Persistence] ||
-        [database: "seven_#{Mix.env()}", hostname: "127.0.0.1", port: 27_017]
+    persistence_opts = Application.get_all_env(:seven)[Seven.Data.Persistence] || []
 
     # Define workers and child supervisors to be supervised
     children = [

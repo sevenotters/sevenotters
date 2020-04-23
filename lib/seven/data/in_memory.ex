@@ -16,6 +16,9 @@ defmodule Seven.Data.InMemory do
     {:ok, %{}}
   end
 
+  @spec initialize(String.t()) :: any
+  def initialize(_collection), do: nil
+
   @spec insert(String.t(), Map.t()) :: any
   def insert(collection, value) do
     GenServer.cast(__MODULE__, {:insert, [collection, value]})
@@ -45,7 +48,7 @@ defmodule Seven.Data.InMemory do
 
   @spec drop_collections(List.t()) :: any
   def drop_collections(collections) do
-    GenServer.cast(__MODULE__, {:drop_collections, collections})
+    GenServer.call(__MODULE__, {:drop_collections, collections})
   end
 
   @spec sort_expression() :: any
@@ -53,6 +56,9 @@ defmodule Seven.Data.InMemory do
 
   @spec type_expression([String.t()]) :: any
   def type_expression(types), do: %{types: types}
+
+  @spec correlation_id_expression(String.t()) :: any
+  def correlation_id_expression(correlation_id), do: %{correlation_id: correlation_id}
 
   #
   # Callbacks
@@ -74,7 +80,7 @@ defmodule Seven.Data.InMemory do
     {:reply, items, state}
   end
 
-  def handle_call({:content_of, collection, filter, sort}, _from, state) do
+  def handle_call({:content_of, collection, %{correlation_id: _correlation_id} = filter, sort}, _from, state) do
     items =
       state
       |> Map.get(collection, [])
@@ -83,9 +89,9 @@ defmodule Seven.Data.InMemory do
     {:reply, items, state}
   end
 
-  def handle_cast({:drop_collections, collections}, state) do
+  def handle_call({:drop_collections, collections}, _from, state) do
     state = collections |> Enum.reduce(state, fn c, state -> state |> Map.put(c, []) end)
-    {:noreply, state}
+    {:reply, nil, state}
   end
 
   def handle_cast({:insert, [collection, value]}, state) do

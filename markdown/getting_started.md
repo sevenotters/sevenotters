@@ -59,6 +59,17 @@ config :seven,
   persistence: SevenottersMongo.Storage
 ```
 
+add `sevenotters_mongo` to project dependencies:
+
+```elixir
+defp deps do
+[
+  ...
+  {:sevenotters_mongo, "~> 0.1"}
+]
+end
+```
+
 and configure the connection:
 
 ```elixir
@@ -66,6 +77,32 @@ config :seven, Seven.Data.Persistence,
   database: "my_first_cqrses",
   hostname: "127.0.0.1",
   port: 27_017
+```
+
+To use Elasticsearch, add to your configuration:
+
+```elixir
+config :seven,
+  persistence: SevenottersElasticsearch.Storage
+```
+
+add `sevenotters_elasticsearch` to project dependencies:
+
+```elixir
+defp deps do
+[
+  ...
+  {:sevenotters_elasticsearch, "~> 0.1"}
+]
+end
+```
+
+and configure the connection:
+
+```elixir
+config :seven, Seven.Data.Persistence,
+  url: "http://localhost",
+  port: 9_200
 ```
 
 ## Create your first aggregate and add a command

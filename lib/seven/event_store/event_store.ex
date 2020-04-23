@@ -12,10 +12,7 @@ defmodule Seven.EventStore.EventStore do
   # API
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
-    next_counter = Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
-    Seven.Log.debug("Next event counter: #{next_counter}")
-
-    GenServer.start_link(__MODULE__, {:ok, next_counter}, opts ++ [name: __MODULE__])
+    GenServer.start_link(__MODULE__, :ok, opts ++ [name: __MODULE__])
   end
 
   @spec subscribe(String.t(), pid) :: any
@@ -36,15 +33,20 @@ defmodule Seven.EventStore.EventStore do
   @spec state() :: any
   def state(), do: GenServer.call(__MODULE__, :state)
 
-  @spec events_by(Map.t()) :: List.t()
-  def events_by(filter) when is_map(filter), do: GenServer.call(__MODULE__, {:events_by, filter})
+  @spec events_by_correlation_id(String.t()) :: [Map.t()]
+  def events_by_correlation_id(correlation_id), do: GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id})
 
-  @spec events_by_types([String.t()]) :: List.t()
+  @spec events_by_types([String.t()]) :: [Map.t()]
   def events_by_types(types), do: GenServer.call(__MODULE__, {:events_by_types, types})
 
   # Callbacks
-  def init({:ok, next_counter}) do
+  def init(:ok) do
     Seven.Log.info("#{__MODULE__} started.")
+    Persistence.initialize(@events_collection)
+
+    next_counter = Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
+    Seven.Log.debug("Next event counter: #{next_counter}")
+
     {:ok, State.init(next_counter)}
   end
 
@@ -61,9 +63,10 @@ defmodule Seven.EventStore.EventStore do
     {:reply, pid, new_state}
   end
 
-  def handle_call({:events_by, filter}, _from, state) do
+  def handle_call({:events_by_correlation_id, correlation_id}, _from, state) do
+    correlation_id_expression = Persistence.correlation_id_expression(correlation_id)
     sort_expression = Persistence.sort_expression()
-    events = Persistence.content_of(@events_collection, filter, sort_expression) |> to_events
+    events = Persistence.content_of(@events_collection, correlation_id_expression, sort_expression) |> to_events
     {:reply, events, state}
   end
 

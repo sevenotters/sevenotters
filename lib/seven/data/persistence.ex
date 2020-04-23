@@ -9,6 +9,9 @@ defmodule Seven.Data.Persistence do
     persistence()
   end
 
+  @spec initialize(String.t()) :: any
+  def initialize(collection), do: persistence().initialize(collection)
+
   @spec insert(String.t(), Map.t()) :: any
   def insert(collection, %{__struct__: _} = value),
     do: persistence().insert(collection, value |> Map.from_struct())
@@ -41,6 +44,9 @@ defmodule Seven.Data.Persistence do
 
   @spec type_expression([String.t()]) :: any
   def type_expression(types), do: persistence().type_expression(types)
+
+  @spec correlation_id_expression(String.t()) :: any
+  def correlation_id_expression(correlation_id), do: persistence().correlation_id_expression(correlation_id)
 
   defp persistence, do: Application.get_env(:seven, :persistence) || Seven.Data.InMemory
 end

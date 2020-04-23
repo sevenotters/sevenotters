@@ -1,7 +1,7 @@
 defmodule Seven.Otters.Event do
   @moduledoc false
 
-  defstruct _id: nil,
+  defstruct id: nil,
             type: nil,
             counter: nil,
             request_id: nil,
@@ -14,7 +14,7 @@ defmodule Seven.Otters.Event do
   def create(type, payload) do
     struct(
       %__MODULE__{},
-      _id: Seven.Data.Persistence.new_id(),
+      id: Seven.Data.Persistence.new_id(),
       date: now(),
       type: type,
       payload: payload
