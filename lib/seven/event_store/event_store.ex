@@ -51,7 +51,7 @@ defmodule Seven.EventStore.EventStore do
   end
 
   def handle_call(:state, _from, state),
-    do: {:reply, %{event_store: state, events: Persistence.content_of(@events_collection)}, state}
+    do: {:reply, %{event_store: state, events: Persistence.content(@events_collection)}, state}
 
   def handle_call({:subscribe, event_type, pid}, _from, state) do
     new_state = State.subscribe_pid_to_event(state, pid, event_type)
@@ -64,17 +64,16 @@ defmodule Seven.EventStore.EventStore do
   end
 
   def handle_call({:events_by_correlation_id, correlation_id}, _from, state) do
-    correlation_id_expression = Persistence.correlation_id_expression(correlation_id)
     sort_expression = Persistence.sort_expression()
-    events = Persistence.content_of(@events_collection, correlation_id_expression, sort_expression) |> to_events
+    events = Persistence.content_by_correlation_id(@events_collection, correlation_id, sort_expression) |> to_events
     {:reply, events, state}
   end
 
   def handle_call({:events_by_types, types}, _from, state) do
-    type_expression = Persistence.type_expression(types)
     sort_expression = Persistence.sort_expression()
+
     events =
-      Persistence.content_of(@events_collection, type_expression, sort_expression)
+      Persistence.content_by_types(@events_collection, types, sort_expression)
       |> to_events
 
     {:reply, events, state}

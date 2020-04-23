@@ -29,9 +29,16 @@ defmodule Seven.Data.Persistence do
   @spec max_in_collection(String.t(), atom) :: Int.t()
   def max_in_collection(collection, field), do: persistence().max_in_collection(collection, field)
 
-  @spec content_of(String.t(), Map.t(), Map.t()) :: List.t()
-  def content_of(collection, filter \\ %{}, sort \\ %{}),
-    do: persistence().content_of(collection, filter, sort)
+  @spec content_by_correlation_id(String.t(), String.t(), any) :: List.t()
+  def content_by_correlation_id(collection, correlation_id, sort),
+    do: persistence().content_by_correlation_id(collection, correlation_id, sort)
+
+  @spec content_by_types(String.t(), [String.t()], any) :: List.t()
+  def content_by_types(collection, types, sort),
+    do: persistence().content_by_types(collection, types, sort)
+
+  @spec content(String.t()) :: List.t()
+  def content(collection), do: persistence().content(collection)
 
   @spec drop_collections(List.t()) :: any
   def drop_collections(collections), do: persistence().drop_collections(collections)
@@ -39,14 +46,8 @@ defmodule Seven.Data.Persistence do
   @spec is_valid_id?(any) :: Boolean.t()
   def is_valid_id?(id), do: persistence().is_valid_id?(id)
 
-  @spec sort_expression() :: any
+  @spec sort_expression() :: atom()
   def sort_expression(), do: persistence().sort_expression()
-
-  @spec type_expression([String.t()]) :: any
-  def type_expression(types), do: persistence().type_expression(types)
-
-  @spec correlation_id_expression(String.t()) :: any
-  def correlation_id_expression(correlation_id), do: persistence().correlation_id_expression(correlation_id)
 
   defp persistence, do: Application.get_env(:seven, :persistence) || Seven.Data.InMemory
 end

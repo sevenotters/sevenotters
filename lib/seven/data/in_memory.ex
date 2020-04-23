@@ -41,9 +41,19 @@ defmodule Seven.Data.InMemory do
     GenServer.call(__MODULE__, {:max_in_collection, collection, field})
   end
 
-  @spec content_of(String.t(), Map.t(), Map.t()) :: List.t()
-  def content_of(collection, filter, sort) do
-    GenServer.call(__MODULE__, {:content_of, collection, filter, sort})
+  @spec content_by_correlation_id(String.t(), String.t(), atom()) :: List.t()
+  def content_by_correlation_id(collection, correlation_id, sort_field) do
+    GenServer.call(__MODULE__, {:content_by_correlation_id, collection, correlation_id, sort_field})
+  end
+
+  @spec content_by_types(String.t(), [String.t()], atom()) :: List.t()
+  def content_by_types(collection, types, sort_field) do
+    GenServer.call(__MODULE__, {:content_by_types, collection, types, sort_field})
+  end
+
+  @spec content(String.t()) :: List.t()
+  def content(collection) do
+    GenServer.call(__MODULE__, {:content, collection})
   end
 
   @spec drop_collections(List.t()) :: any
@@ -54,12 +64,6 @@ defmodule Seven.Data.InMemory do
   @spec sort_expression() :: any
   def sort_expression(), do: :counter
 
-  @spec type_expression([String.t()]) :: any
-  def type_expression(types), do: %{types: types}
-
-  @spec correlation_id_expression(String.t()) :: any
-  def correlation_id_expression(correlation_id), do: %{correlation_id: correlation_id}
-
   #
   # Callbacks
   #
@@ -68,24 +72,34 @@ defmodule Seven.Data.InMemory do
       state
       |> Map.get(collection, [])
       |> Enum.max_by(&Map.fetch(&1, field), fn -> 0 end)
+
     {:reply, items, state}
   end
 
-  def handle_call({:content_of, collection, %{types: types}, sort}, _from, state) do
+  def handle_call({:content_by_types, collection, types, sort_field}, _from, state) do
     items =
       state
       |> Map.get(collection, [])
       |> Enum.filter(fn i -> i.type in types end)
-      |> Enum.sort_by(&Map.fetch(&1, sort))
+      |> Enum.sort_by(&Map.fetch(&1, sort_field))
+
     {:reply, items, state}
   end
 
-  def handle_call({:content_of, collection, %{correlation_id: _correlation_id} = filter, sort}, _from, state) do
+  def handle_call({:content_by_correlation_id, collection, correlation_id, sort_field}, _from, state) do
+    filter = %{correlation_id: correlation_id}
+
     items =
       state
       |> Map.get(collection, [])
       |> Enum.filter(fn i -> match?(^filter, i) end)
-      |> Enum.sort_by(&Map.fetch(&1, sort))
+      |> Enum.sort_by(&Map.fetch(&1, sort_field))
+
+    {:reply, items, state}
+  end
+
+  def handle_call({:content, collection}, _from, state) do
+    items = state |> Map.get(collection, [])
     {:reply, items, state}
   end
 
