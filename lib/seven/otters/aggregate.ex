@@ -41,15 +41,11 @@ defmodule Seven.Otters.Aggregate do
       @max_lifetime_minutes Application.get_env(:seven, :aggregate_lifetime) || 60
       @lifetime_minutes_check div(@max_lifetime_minutes, 2)
 
-      def init(args), do: {:ok, args}
-
       # API
       def aggregate_field, do: unquote(aggregate_field)
 
       def start_link(correlation_id, opts \\ []) do
-        {:ok, pid} = GenServer.start_link(__MODULE__, nil, opts)
-
-        GenServer.cast(pid, {:init, correlation_id})
+        {:ok, pid} = GenServer.start_link(__MODULE__, correlation_id, opts)
 
         Seven.Log.debug("Max aggregates lifetime: #{@max_lifetime_minutes} minutes")
         Seven.Log.debug("Aggregates lifetime check: #{@lifetime_minutes_check} minutes")
@@ -68,25 +64,31 @@ defmodule Seven.Otters.Aggregate do
       def data(pid), do: GenServer.call(pid, :data)
 
       # Callbacks
+      def init(correlation_id), do: {:ok, correlation_id, {:continue, :rehydrate}}
+
+      def handle_continue(:rehydrate, correlation_id) do
+        Seven.Log.debug("Init (#{inspect(self())}): #{inspect(correlation_id)}")
+
+        events = Seven.EventStore.EventStore.events_by_correlation_id(correlation_id)
+
+        Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
+        state = events |> apply_events(init_state())
+
+        Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
+
+        {:noreply,
+          %{
+            correlation_id: correlation_id,
+            internal_state: state,
+            last_touch: Timex.Duration.now()
+          }
+        }
+      end
+
       def handle_call(:state, _from, state), do: {:reply, state, state}
 
       def handle_call(:data, _from, %{internal_state: internal_state} = state),
         do: {:reply, internal_state, state}
-
-      def handle_cast({:init, correlation_id}, nil) do
-        Seven.Log.debug("Init (#{inspect(self())}): #{inspect(correlation_id)}")
-
-        state =
-          Seven.EventStore.EventStore.events_by_correlation_id(correlation_id)
-          |> apply_events(init_state())
-
-        {:noreply,
-         %{
-           correlation_id: correlation_id,
-           internal_state: state,
-           last_touch: Timex.Duration.now()
-         }}
-      end
 
       def handle_call({:command, command}, _from, %{internal_state: internal_state} = state) do
         Seven.Log.debug("#{__MODULE__} received command: #{inspect(command)}")

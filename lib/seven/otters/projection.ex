@@ -37,15 +37,21 @@ defmodule Seven.Otters.Projection do
       def clean, do: GenServer.call(__MODULE__, :clean)
 
       # Callbacks
-      def init(:ok) do
+      def init(:ok), do: {:ok, nil, {:continue, :rehydrate}}
+
+      def handle_continue(:rehydrate, _state) do
         Seven.Log.info("#{__MODULE__} started.")
 
-        state =
+        events =
           unquote(listener_of_events)
           |> Seven.EventStore.EventStore.events_by_types()
-          |> apply_events(initial_state())
 
-        {:ok, state}
+        Seven.Log.info("Processing #{length(events)} events for #{__MODULE__}.")
+        state = events |> apply_events(initial_state())
+
+        Seven.Log.info("#{__MODULE__} rehydrated")
+
+        {:noreply, state}
       end
 
       def handle_call({:query, query_filter, params}, _from, state) do
