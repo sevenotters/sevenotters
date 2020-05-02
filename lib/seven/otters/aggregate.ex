@@ -97,8 +97,10 @@ defmodule Seven.Otters.Aggregate do
 
         case pre_handle_command(command, internal_state) do
           :ok -> command_internal(command, state)
-          err -> {:reply, err, state}
-        end
+          err ->
+            after_command(err)
+            {:reply, err, state}
+          end
       end
 
       def terminate(:normal, _state) do
@@ -107,6 +109,17 @@ defmodule Seven.Otters.Aggregate do
 
       def terminate(reason, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
+      end
+
+      defp after_command({:no_aggregate, _msg}) do
+        Seven.Log.debug("No aggregate to keep: send :useless to #{__MODULE__}")
+        Process.send(self(), :useless, [])
+      end
+      defp after_command(err), do: err
+
+      def handle_info(:useless, state) do
+        Seven.Log.debug("Useless #{__MODULE__}")
+        {:stop, :normal, state}
       end
 
       def handle_info({:DOWN, _ref, :process, pid, reason}, state) do
