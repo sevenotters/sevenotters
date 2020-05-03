@@ -202,13 +202,6 @@ defmodule Seven.Otters.Aggregate do
         Seven.EventStore.EventStore.fire(event)
         trigger(events)
       end
-
-      defp validate(command, schema) do
-        case Ve.validate(command.payload, schema) do
-          {:ok, _} -> {:routed, command, __MODULE__}
-          {:error, reasons} -> {:routed_but_invalid, reasons |> List.first()}
-        end
-      end
     end
   end
 end

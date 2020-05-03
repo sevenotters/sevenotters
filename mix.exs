@@ -4,7 +4,7 @@ defmodule Seven.Mixfile do
   def project do
     [
       app: :seven,
-      version: "0.2.1",
+      version: "0.2.2",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -59,8 +59,7 @@ defmodule Seven.Mixfile do
       {:poolboy, "~> 1.5"},
       {:sevenotters_persistence, "~> 0.1"},
       {:timex, "~> 3.6"},
-      {:uuid, "~> 1.1.8"},
-      {:ve, "~> 0.1"}
+      {:uuid, "~> 1.1.8"}
     ]
   end
 end
