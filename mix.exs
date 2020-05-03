@@ -58,7 +58,6 @@ defmodule Seven.Mixfile do
       {:poison, "~> 4.0"},
       {:poolboy, "~> 1.5"},
       {:sevenotters_persistence, "~> 0.1"},
-      {:timex, "~> 3.6"},
       {:uuid, "~> 1.1.8"}
     ]
   end

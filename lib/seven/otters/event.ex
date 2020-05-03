@@ -22,7 +22,7 @@ defmodule Seven.Otters.Event do
   end
 
   defp now do
-    {:ok, t} = Timex.now() |> Timex.format("{ISO:Extended}")
+    {:ok, t} = DateTime.now!("Etc/UTC") |> DateTime.to_iso8601()
     t
   end
 end
