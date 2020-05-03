@@ -15,14 +15,9 @@ defmodule Seven.Otters.Event do
     struct(
       %__MODULE__{},
       id: Seven.Data.Persistence.new_id(),
-      date: now(),
+      date: DateTime.now!("Etc/UTC") |> DateTime.to_iso8601(),
       type: type,
       payload: payload
     )
-  end
-
-  defp now do
-    {:ok, t} = DateTime.now!("Etc/UTC") |> DateTime.to_iso8601()
-    t
   end
 end

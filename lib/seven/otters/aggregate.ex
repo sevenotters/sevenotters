@@ -80,7 +80,7 @@ defmodule Seven.Otters.Aggregate do
           %{
             correlation_id: correlation_id,
             internal_state: state,
-            last_touch: Timex.Duration.now()
+            last_touch: DateTime.now!("Etc/UTC")
           }
         }
       end
@@ -93,7 +93,7 @@ defmodule Seven.Otters.Aggregate do
       def handle_call({:command, command}, _from, %{internal_state: internal_state} = state) do
         Seven.Log.debug("#{__MODULE__} received command: #{inspect(command)}")
 
-        state = %{state | last_touch: Timex.Duration.now()}
+        state = %{state | last_touch: DateTime.now!("Etc/UTC")}
 
         case pre_handle_command(command, internal_state) do
           :ok -> command_internal(command, state)
@@ -128,7 +128,7 @@ defmodule Seven.Otters.Aggregate do
       end
 
       def handle_info(:verify_alive, %{last_touch: last_touch} = state) do
-        minutes = Timex.Duration.diff(Timex.Duration.now(), last_touch, :minutes)
+        minutes = DateTime.diff(DateTime.now!("Etc/UTC"), last_touch, :minutes)
 
         case minutes > @max_lifetime_minutes do
           true ->
