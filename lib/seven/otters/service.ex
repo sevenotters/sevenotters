@@ -76,12 +76,14 @@ defmodule Seven.Otters.Service do
         trigger(events)
       end
 
-      defp validate(command, schema) do
-        case Ve.validate(command.payload, schema) do
-          {:ok, _} -> {:routed, command, __MODULE__}
-          {:error, reasons} -> {:routed_but_invalid, reasons |> List.first()}
-        end
-      end
+      @before_compile Seven.Otters.Service
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote generated: true do
+      def route(_command, _params), do: :not_routed
+      defp handle_command(command, _state), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"
     end
   end
 end

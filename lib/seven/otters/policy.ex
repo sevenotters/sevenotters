@@ -12,7 +12,7 @@ defmodule Seven.Otters.Policy do
       def start_link(opts \\ []) do
         {:ok, pid} = GenServer.start_link(__MODULE__, {:ok, nil}, opts ++ [name: __MODULE__])
 
-        # subscribe my events in store
+        # subscribe my events in store [TODO: put in init()]
         unquote(listener_of_events)
         |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, pid))
 
@@ -37,7 +37,13 @@ defmodule Seven.Otters.Policy do
 
       def handle_info(_, state), do: {:noreply, state}
 
-      # Privates
+      @before_compile Seven.Otters.Policy
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote generated: true do
+      defp handle_event(event), do: raise "Event #{inspect event} is not handled correctly by #{__MODULE__}"
     end
   end
 end

@@ -202,6 +202,17 @@ defmodule Seven.Otters.Aggregate do
         Seven.EventStore.EventStore.fire(event)
         trigger(events)
       end
+
+      @before_compile Seven.Otters.Aggregate
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote generated: true do
+      def route(_command, _params), do: :not_routed
+      defp pre_handle_command(_command, _state), do: :ok
+      defp handle_command(command, _state), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"
+      defp handle_event(event, _state), do: raise "Event #{inspect event} is not handled correctly by #{__MODULE__}"
     end
   end
 end

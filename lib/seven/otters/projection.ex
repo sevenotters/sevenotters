@@ -13,7 +13,7 @@ defmodule Seven.Otters.Projection do
       def start_link(opts \\ []) do
         {:ok, pid} = GenServer.start_link(__MODULE__, :ok, opts ++ [name: __MODULE__])
 
-        # subscribe my events in store
+        # subscribe my events in store [TODO: put in init()]
         unquote(listener_of_events)
         |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, pid))
 
@@ -67,9 +67,9 @@ defmodule Seven.Otters.Projection do
       end
 
       def handle_call({:filter, filter_func}, _from, state),
-        do: {:reply, handle_filter(filter_func, state), state}
+        do: {:reply, state |> Enum.filter(filter_func), state}
 
-      def handle_call(:state, _from, state), do: {:reply, handle_state(state), state}
+      def handle_call(:state, _from, state), do: {:reply, state, state}
 
       def handle_call(:pid, _from, state), do: {:reply, self(), state}
       def handle_call(:clean, _from, state), do: {:reply, :ok, initial_state()}
@@ -105,12 +105,15 @@ defmodule Seven.Otters.Projection do
         apply_events(events, new_state)
       end
 
-      defp validate(params, schema) do
-        case Ve.validate(params, schema) do
-          {:ok, _} -> :ok
-          err -> err
-        end
-      end
+      @before_compile Seven.Otters.Projection
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote generated: true do
+      defp handle_event(event, _state), do: raise "Event #{inspect event} is not handled correctly by #{__MODULE__}"
+      defp pre_handle_query(query, _params, _state), do: raise "Query #{inspect query} is not handled correctly by #{__MODULE__}: missing pre_handle_query()"
+      defp handle_query(query, _params, state), do: raise "Query #{inspect query} is not handled correctly by #{__MODULE__}: missing handle_query()"
     end
   end
 end
