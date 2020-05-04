@@ -47,7 +47,7 @@ defmodule Seven.Otters.Projection do
           |> Seven.EventStore.EventStore.events_by_types()
 
         Seven.Log.info("Processing #{length(events)} events for #{__MODULE__}.")
-        state = events |> apply_events(initial_state())
+        state = events |> apply_events(init_state())
 
         Seven.Log.info("#{__MODULE__} rehydrated")
 
@@ -72,7 +72,7 @@ defmodule Seven.Otters.Projection do
       def handle_call(:state, _from, state), do: {:reply, state, state}
 
       def handle_call(:pid, _from, state), do: {:reply, self(), state}
-      def handle_call(:clean, _from, state), do: {:reply, :ok, initial_state()}
+      def handle_call(:clean, _from, state), do: {:reply, :ok, init_state()}
 
       def terminate(:normal, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")

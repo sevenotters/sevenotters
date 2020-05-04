@@ -22,7 +22,7 @@ defmodule Seven.Otters.Service do
       # Callbacks
       def init(:ok) do
         Seven.Log.info("#{__MODULE__} started.")
-        {:ok, initialize()}
+        {:ok, init_state()}
       end
 
       def handle_call(:state, _from, state), do: {:reply, state, state}
@@ -83,7 +83,8 @@ defmodule Seven.Otters.Service do
   defmacro __before_compile__(_env) do
     quote generated: true do
       def route(_command, _params), do: :not_routed
-      defp handle_command(command, _state), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"
+      def handle_service_info(_, state), do: {:noreply, state}
+      defp handle_command(command), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"
     end
   end
 end
