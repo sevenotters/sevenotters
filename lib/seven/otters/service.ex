@@ -82,6 +82,7 @@ defmodule Seven.Otters.Service do
 
   defmacro __before_compile__(_env) do
     quote generated: true do
+      defp init_state(), do: %{}
       def route(_command, _params), do: :not_routed
       def handle_service_info(_, state), do: {:noreply, state}
       defp handle_command(command), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"

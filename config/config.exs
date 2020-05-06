@@ -27,13 +27,6 @@ config :seven,
   # in minutes
   aggregate_lifetime: 3_600
 
-# See [docs](https://github.com/ericmj/mongodb/blob/master/lib/mongo.ex)
-# for flags documentation
-config :seven, Seven.Data.Persistence,
-  database: "seven_dev",
-  hostname: "127.0.0.1",
-  port: 27_017
-
 config :seven, Seven.Entities,
   entity_app: :seven,
   batches: []
