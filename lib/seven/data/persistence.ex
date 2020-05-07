@@ -1,11 +1,11 @@
 defmodule Seven.Data.Persistence do
   @moduledoc false
 
-  require Logger
+  alias Seven.Log
 
   @spec current() :: atom
   def current do
-    Logger.info("Using presistence: #{persistence()}")
+    Log.info("Using persistence: #{persistence()}")
     persistence()
   end
 

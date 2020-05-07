@@ -12,9 +12,10 @@ defmodule Seven.Sync.ApiCommandRouter do
         %ApiRequest{
           request_id: Seven.Data.Persistence.new_id(),
           command: unquote(post).command,
+          state: :unmanaged,
           req_headers: conn.req_headers,
           params: conn.params,
-          wait_for_events: unquote(post)[:wait_for_events]
+          wait_for_events: unquote(post)[:wait_for_events] || []
         }
         |> apply_crc_signature
         |> sync_validation
@@ -117,7 +118,7 @@ defmodule Seven.Sync.ApiCommandRouter do
         {_, _, p} = post
 
         if p[:prepare_response] |> is_not_nil do
-          we = p[:wait_for_events] || []
+          we = p[:wait_for_events]
 
           case length(we) do
             0 ->

@@ -11,6 +11,7 @@ defmodule Seven.Sync.ApiQueryRouter do
       def run(conn) do
         %ApiRequest{
           req_headers: conn.req_headers,
+          state: :unmanaged,
           params: conn.params,
           projection: unquote(post).projection,
           filter: unquote(post).filter,

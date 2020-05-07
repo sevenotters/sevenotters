@@ -4,7 +4,7 @@ defmodule Seven.Sync.ApiRequest do
   defstruct request_id: nil,
             command: nil,
             projection: nil,
-            state: :unmanaged,
+            state: nil,
             req_headers: nil,
             params: nil,
             wait_for_events: [],

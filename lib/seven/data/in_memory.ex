@@ -1,14 +1,14 @@
 defmodule Seven.Data.InMemory do
   @moduledoc false
   use GenServer
-  require Logger
+  alias Seven.Log
 
   @behaviour SevenottersPersistence.Storage
 
   @id_regex ~r/^[A-Fa-f0-9\-]{24}$/
 
   def start_link(opts \\ []) do
-    Logger.info("Persistence is InMemory")
+    Log.info("Persistence is InMemory")
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
