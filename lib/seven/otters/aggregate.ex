@@ -111,12 +111,6 @@ defmodule Seven.Otters.Aggregate do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
       end
 
-      defp after_command({:no_aggregate, _msg}) do
-        Seven.Log.debug("No aggregate to keep: send :useless to #{__MODULE__}")
-        Process.send(self(), :useless, [])
-      end
-      defp after_command(err), do: err
-
       def handle_info(:useless, state) do
         Seven.Log.debug("Useless #{__MODULE__}")
         {:stop, :normal, state}
@@ -202,6 +196,12 @@ defmodule Seven.Otters.Aggregate do
         Seven.EventStore.EventStore.fire(event)
         trigger(events)
       end
+
+      defp after_command({:no_aggregate, _msg}) do
+        Seven.Log.debug("No aggregate to keep: send :useless to #{__MODULE__}")
+        Process.send(self(), :useless, [])
+      end
+      defp after_command(err), do: err
 
       @before_compile Seven.Otters.Aggregate
     end

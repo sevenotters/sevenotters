@@ -54,7 +54,7 @@ defmodule Seven.Sync.ApiCommandRouter do
       defp subscribe_to_event_store(%ApiRequest{state: :unmanaged, wait_for_events: []} = req),
         do: req
 
-      defp subscribe_to_event_store(%ApiRequest{state: :unmanaged, wait_for_events: wait_for_events} = req) do
+      defp subscribe_to_event_store(%ApiRequest{state: :unmanaged, wait_for_events: wait_for_events} = req) when length(wait_for_events) > 0 do
         wait_for_events |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))
         req
       end
@@ -91,7 +91,7 @@ defmodule Seven.Sync.ApiCommandRouter do
       defp unsubscribe_to_event_store(%ApiRequest{state: :managed, wait_for_events: []} = req),
         do: req
 
-      defp unsubscribe_to_event_store(%ApiRequest{state: :managed, wait_for_events: wait_for_events} = req) do
+      defp unsubscribe_to_event_store(%ApiRequest{state: :managed, wait_for_events: wait_for_events} = req) when length(wait_for_events) > 0 do
         wait_for_events |> Enum.each(&Seven.EventStore.EventStore.unsubscribe(&1, self()))
         req
       end
