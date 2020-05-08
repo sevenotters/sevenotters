@@ -122,7 +122,7 @@ defmodule Seven.Otters.Aggregate do
       end
 
       def handle_info(:verify_alive, %{last_touch: last_touch} = state) do
-        minutes = DateTime.diff(DateTime.now!("Etc/UTC"), last_touch, :minutes)
+        minutes = DateTime.diff(DateTime.now!("Etc/UTC"), last_touch, :second)
 
         case minutes > @max_lifetime_minutes do
           true ->
@@ -210,8 +210,14 @@ defmodule Seven.Otters.Aggregate do
   defmacro __before_compile__(_env) do
     quote generated: true do
       def route(_command, _params), do: :not_routed
+
+      @spec pre_handle_command(Seven.Otters.Command.t(), any) :: any
       defp pre_handle_command(_command, _state), do: :ok
+
+      @spec handle_command(Seven.Otters.Command.t(), any) :: any
       defp handle_command(command, _state), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"
+
+      @spec handle_event(Seven.Otters.Event.t(), any) :: any
       defp handle_event(event, _state), do: raise "Event #{inspect event} is not handled correctly by #{__MODULE__}"
     end
   end
