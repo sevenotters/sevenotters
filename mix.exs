@@ -4,7 +4,7 @@ defmodule Seven.Mixfile do
   def project do
     [
       app: :seven,
-      version: "0.2.7",
+      version: "0.2.8",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -53,7 +53,7 @@ defmodule Seven.Mixfile do
       {:bunt, "~> 0.2"},
       {:cors_plug, "~> 2.0"},
       {:credo, "~> 1.4", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:plug, "~> 1.10"},
       {:poison, "~> 4.0"},
       {:poolboy, "~> 1.5"},
