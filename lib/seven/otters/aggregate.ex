@@ -33,7 +33,6 @@ defmodule Seven.Otters.Aggregate do
   defmacro __using__(aggregate_field: aggregate_field) do
     quote location: :keep do
       use GenServer
-      use Seven.Utils.Map
 
       use Seven.Utils.Tagger
       @tag :aggregate

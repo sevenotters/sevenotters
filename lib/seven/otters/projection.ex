@@ -4,7 +4,6 @@ defmodule Seven.Otters.Projection do
   defmacro __using__(listener_of_events: listener_of_events) do
     quote location: :keep do
       use GenServer
-      use Seven.Utils.ListOfMaps
 
       use Seven.Utils.Tagger
       @tag :projection
