@@ -1,6 +1,8 @@
 defmodule Seven.Otters.Command do
   @moduledoc false
 
+  @type t :: %__MODULE__{}
+
   defstruct id: nil,
             type: nil,
             request_id: nil,

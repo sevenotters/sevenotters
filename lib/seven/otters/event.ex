@@ -1,6 +1,8 @@
 defmodule Seven.Otters.Event do
   @moduledoc false
 
+  @type t :: %__MODULE__{}
+
   defstruct id: nil,
             type: nil,
             counter: nil,
