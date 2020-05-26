@@ -103,6 +103,10 @@ and configure the connection:
 config :seven, Seven.Data.Persistence,
   url: "http://localhost",
   port: 9_200
+
+config :elastix,
+  json_options: [keys: :atoms],
+  httpoison_options: [hackney: [pool: :elastix_pool]]
 ```
 
 ## Create your first aggregate and add a command
