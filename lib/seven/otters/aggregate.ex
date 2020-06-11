@@ -97,7 +97,7 @@ defmodule Seven.Otters.Aggregate do
         case pre_handle_command(command, internal_state) do
           :ok -> command_internal(command, state)
           err ->
-            after_command(err)
+            err = after_command(err)
             {:reply, err, state}
           end
       end
@@ -157,6 +157,7 @@ defmodule Seven.Otters.Aggregate do
             {:reply, :managed, %{state | internal_state: new_internal_state}}
 
           err ->
+            err = after_command(err)
             {:reply, err, state}
         end
       end
@@ -196,9 +197,10 @@ defmodule Seven.Otters.Aggregate do
         trigger(events)
       end
 
-      defp after_command({:no_aggregate, _msg}) do
+      defp after_command({:no_aggregate, msg}) do
         Seven.Log.debug("No aggregate to keep: send :useless to #{__MODULE__}")
         Process.send(self(), :useless, [])
+        msg
       end
       defp after_command(err), do: err
 
