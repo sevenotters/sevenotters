@@ -65,8 +65,7 @@ defmodule Seven.Otters.Process do
 
       @spec create_event(String.t(), Map.t()) :: Map.t()
       defp create_event(type, payload) when is_map(payload) do
-        Seven.Otters.Event.create(type, payload)
-        |> Map.put(:correlation_module, __MODULE__)
+        Seven.Otters.Event.create(type, payload, __MODULE__)
       end
 
       defp trigger([]), do: :ok
