@@ -141,8 +141,8 @@ end
   defmacro __before_compile__(_env) do
     quote generated: true do
       defp handle_event(event, _state), do: raise "Event #{inspect event} is not handled correctly by #{registered_name()}"
-      defp pre_handle_query(query, _params, _state), do: raise "Query #{inspect query} is not handled correctly by #{registered_name()}: missing pre_handle_query()"
-      defp handle_query(query, _params, state), do: raise "Query #{inspect query} is not handled correctly by #{registered_name()}: missing handle_query()"
+      defp pre_handle_query(query, _params, _state), do: raise "Query #{inspect query} does not exist in #{registered_name()}: missing pre_handle_query()"
+      defp handle_query(query, _params, state), do: raise "Query #{inspect query} does not exist in #{registered_name()}: missing handle_query()"
     end
   end
 end

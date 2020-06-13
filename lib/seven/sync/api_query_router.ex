@@ -8,37 +8,60 @@ defmodule Seven.Sync.ApiQueryRouter do
       alias Seven.Sync.ApiRequest
 
       @doc false
-      def run(conn) do
+      @spec run(map) :: any
+      def run(params) do
         %ApiRequest{
-          req_headers: conn.req_headers,
           state: :unmanaged,
-          params: conn.params,
+          params: params,
           projection: unquote(post).projection,
-          filter: unquote(post).filter,
           query: unquote(post).query
         }
-        |> crc_signature_checker
-        |> apply_authentication
+        |> internal_pre_query
         |> send_query_request
-        |> filter_data
+        |> internal_post_query
       end
 
+      #
       # Privates
-      defp crc_signature_checker(%ApiRequest{state: :unmanaged} = req) do
-        # Api.App.CrcSignature.verify(req)
-        # req
+      #
+      unquote do
+        {_, _, p} = post
+
+        if p[:pre_query] |> is_not_nil do
+          quote do
+            defp internal_pre_query(%ApiRequest{state: :unmanaged} = req) do
+              case unquote(p[:pre_query]).(req) do
+                :ok -> req
+                err -> %ApiRequest{req | state: err}
+              end
+            end
+          end
+        end
       end
 
-      defp filter_data(%ApiRequest{state: :managed, filter: filter} = req)
-           when not is_nil(filter),
-           do: filter.(req)
+      defp internal_pre_query(%ApiRequest{} = req), do: req
 
-      defp filter_data(%ApiRequest{} = req), do: req
+      unquote do
+        {_, _, p} = post
+
+        if p[:post_query] |> is_not_nil do
+          quote do
+            defp internal_post_query(%ApiRequest{state: :managed} = req),
+              do: unquote(p[:post_query]).(req.response)
+          end
+        else
+          quote do
+            defp internal_post_query(%ApiRequest{state: :managed} = req), do: req.response
+          end
+        end
+      end
+
+      defp internal_post_query(%ApiRequest{} = req), do: req.state
 
       defp send_query_request(%ApiRequest{state: :unmanaged, projection: projection, query: query, params: params} = req) do
         with {:ok, module} <- Seven.Projections.get_projection(projection),
              {:ok, data} <- module.query(query, params) do
-          %ApiRequest{req | state: :managed, response: data}
+          %ApiRequest{req | state: :managed, response: {:ok, data}}
         else
           {:error, :projection_not_found} ->
             %ApiRequest{req | state: :projection_not_found}
@@ -49,19 +72,6 @@ defmodule Seven.Sync.ApiQueryRouter do
       end
 
       defp send_query_request(%ApiRequest{} = req), do: req
-
-      unquote do
-        {_, _, p} = post
-
-        if p[:authentication] |> is_not_nil do
-          quote do
-            defp apply_authentication(%ApiRequest{state: :unmanaged, projection: unquote(p[:projection])} = req),
-              do: unquote(p[:authentication]).(req)
-          end
-        end
-      end
-
-      defp apply_authentication(%ApiRequest{} = req), do: req
     end
   end
 end

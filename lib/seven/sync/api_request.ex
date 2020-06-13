@@ -5,11 +5,9 @@ defmodule Seven.Sync.ApiRequest do
             command: nil,
             projection: nil,
             state: nil,
-            req_headers: nil,
             params: nil,
             wait_for_events: [],
             events: [],
             response: nil,
-            filter: nil,
             query: nil
 end
