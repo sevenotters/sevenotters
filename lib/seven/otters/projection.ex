@@ -56,7 +56,7 @@ end
 
         res =
           case pre_handle_query(query_filter, params, state) do
-            :ok -> {:ok, handle_query(query_filter, params, state)}
+            :ok -> handle_query(query_filter, params, state)
             err -> err
           end
 

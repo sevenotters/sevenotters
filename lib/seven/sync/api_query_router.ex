@@ -60,8 +60,8 @@ defmodule Seven.Sync.ApiQueryRouter do
 
       defp send_query_request(%ApiRequest{state: :unmanaged, projection: projection, query: query, params: params} = req) do
         with {:ok, module} <- Seven.Projections.get_projection(projection),
-             {:ok, data} <- module.query(query, params) do
-          %ApiRequest{req | state: :managed, response: {:ok, data}}
+             data <- module.query(query, params) do
+          %ApiRequest{req | state: :managed, response: data}
         else
           {:error, :projection_not_found} ->
             %ApiRequest{req | state: :projection_not_found}
