@@ -47,7 +47,7 @@ defmodule Seven.Sync.ApiQueryRouter do
         if p[:post_query] |> is_not_nil do
           quote do
             defp internal_post_query(%ApiRequest{state: :managed} = req),
-              do: unquote(p[:post_query]).(req.response)
+              do: unquote(p[:post_query]).(req, req.response)
           end
         else
           quote do
