@@ -17,7 +17,7 @@ defmodule Seven.Otters.Event do
     struct(
       %__MODULE__{},
       id: Seven.Data.Persistence.new_id(),
-      date: DateTime.now!("Etc/UTC") |> DateTime.to_iso8601(),
+      date: DateTime.utc_now() |> DateTime.to_iso8601(),
       type: type,
       correlation_module: correlation_module,
       payload: payload
