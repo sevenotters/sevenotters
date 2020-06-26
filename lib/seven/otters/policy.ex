@@ -25,6 +25,14 @@ defmodule Seven.Otters.Policy do
         {:ok, state}
       end
 
+      def terminate(:normal, _state) do
+        Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")
+      end
+
+      def terminate(reason, state) do
+        Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for #{inspect(reason)}")
+      end
+
       def handle_info(%Seven.Otters.Event{} = event, state) do
         Seven.Log.event_received(event, __MODULE__)
 
@@ -32,6 +40,11 @@ defmodule Seven.Otters.Policy do
         |> Enum.map(&Seven.Log.command_request_sent/1)
         |> Enum.each(&Seven.CommandBus.send_command_request/1)
 
+        {:noreply, state}
+      end
+
+      def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
+        Seven.Log.debug("Dying #{__MODULE__}(#{inspect(pid)}): #{inspect(state)}")
         {:noreply, state}
       end
 

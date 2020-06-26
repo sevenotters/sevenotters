@@ -10,4 +10,8 @@ defmodule Seven.Sync.ApiRequest do
             events: [],
             response: nil,
             query: nil
+
+  defdelegate fetch(term, key), to: Map
+  defdelegate get(term, key, default), to: Map
+  defdelegate get_and_update(term, key, fun), to: Map
 end

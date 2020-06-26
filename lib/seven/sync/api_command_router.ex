@@ -78,8 +78,9 @@ defmodule Seven.Sync.ApiCommandRouter do
           quote do
             defp internal_pre_command(%ApiRequest{state: :unmanaged, command: unquote(p[:command])} = req) do
               case unquote(p[:pre_command]).(req) do
-                :ok -> req
-                err -> %ApiRequest{req | state: err}
+                :ok         -> req
+                {:ok, req}  -> req
+                err         -> %ApiRequest{req | state: err}
               end
             end
           end
