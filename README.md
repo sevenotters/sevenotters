@@ -11,7 +11,9 @@ Refer to [Getting Started](https://hexdocs.pm/seven/getting_started.html) to hav
 With no order:
 
 - [x] Event store
+    - [x] InMemory support
     - [x] MongoDb support
+    - [x] Elasticsearch support
     - [x] Abstract for different stores beyond Mongo 
 - [x] Event structure
 - [x] Command
@@ -23,15 +25,16 @@ With no order:
     - [ ] Unit test documentation
 - [x] Service
     - [ ] Unit test documentation
-- [x] Process
+- [.] Process (TBC)
+    - [ ] Review
     - [ ] Unit test documentation
 - [x] Projection
     - [ ] Snapshot implementation
     - [ ] Unit test documentation
 - [x] Generic command/query API support (Plug)
-    - [ ] Move to different project as helper library
+    - [ ] To move to different project as helper library
 - [x] Synchronous (domain related) API support
-    - [ ] Move to different project as helper library
+    - [ ] To move to different project as helper library
 - [ ] Generating Seven Otters project template (to analyze)
 - [ ] Authentication support (to a different project as helper library)
 - [ ] Authorization support (to a different project as helper library)

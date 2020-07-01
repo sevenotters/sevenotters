@@ -4,7 +4,7 @@ defmodule Seven.Mixfile do
   def project do
     [
       app: :seven,
-      version: "0.2.16",
+      version: "0.3.0",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -51,12 +51,8 @@ defmodule Seven.Mixfile do
     [
       {:atomic_map, "~> 0.9"},
       {:bunt, "~> 0.2"},
-      {:cors_plug, "~> 2.0"},
       {:credo, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:plug, "~> 1.10"},
-      {:poison, "~> 4.0"},
-      {:poolboy, "~> 1.5"},
       {:sevenotters_persistence, "~> 0.1"},
       {:uuid, "~> 1.1.8"}
     ]
