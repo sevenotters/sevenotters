@@ -27,6 +27,9 @@ defmodule Seven.Data.InMemory do
   @spec new_id :: any
   def new_id, do: UUID.uuid4(:hex)
 
+  @spec new_printable_id :: bitstring
+  def new_printable_id, do: new_id()
+
   @spec printable_id(any) :: String.t()
   def printable_id(id) when is_bitstring(id), do: id
 

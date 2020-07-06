@@ -86,7 +86,7 @@ end
           %{
             correlation_id: correlation_id,
             internal_state: state,
-            last_touch: DateTime.utc_now()
+            last_touch: NaiveDateTime.utc_now()
           }
         }
       end
@@ -99,7 +99,7 @@ end
       def handle_call({:command, command}, _from, %{internal_state: internal_state} = state) do
         Seven.Log.debug("#{__MODULE__} received command: #{inspect(command)}")
 
-        state = %{state | last_touch: DateTime.utc_now()}
+        state = %{state | last_touch: NaiveDateTime.utc_now()}
 
         case pre_handle_command(command, internal_state) do
           :ok -> command_internal(command, state)
@@ -139,7 +139,7 @@ end
       end
 
       def handle_info(:verify_alive, %{last_touch: last_touch} = state) do
-        minutes = DateTime.diff(DateTime.utc_now(), last_touch, :second)
+        minutes = NaiveDateTime.diff(NaiveDateTime.utc_now(), last_touch, :second)
 
         case minutes > @max_lifetime_minutes do
           true ->
