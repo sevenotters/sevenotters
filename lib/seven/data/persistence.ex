@@ -16,6 +16,10 @@ defmodule Seven.Data.Persistence do
   def insert(collection, %{__struct__: _} = value),
     do: persistence().insert(collection, value |> Map.from_struct())
 
+  @spec upsert(bitstring, map, map) :: any
+  def upsert(collection, filter, %{__struct__: _} = value),
+    do: persistence().upsert(collection, filter, value |> Map.from_struct())
+
   @spec new_id :: map
   def new_id, do: persistence().new_id()
 
@@ -49,7 +53,7 @@ defmodule Seven.Data.Persistence do
   @spec is_valid_id?(any) :: boolean
   def is_valid_id?(id), do: persistence().is_valid_id?(id)
 
-  @spec sort_expression() :: atom()
+  @spec sort_expression() :: atom
   def sort_expression(), do: persistence().sort_expression()
 
   defp persistence, do: Application.get_env(:seven, :persistence) || Seven.Data.InMemory

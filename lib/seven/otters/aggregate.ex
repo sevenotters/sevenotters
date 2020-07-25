@@ -42,6 +42,8 @@ defmodule Seven.Otters.Aggregate do
       @max_lifetime_minutes Application.get_env(:seven, :aggregate_lifetime) || 60
       @lifetime_minutes_check div(@max_lifetime_minutes, 2)
 
+      alias Seven.Utils.AggregateSnapshotState
+
       # API
       def aggregate_field, do: unquote(aggregate_field)
 
@@ -79,6 +81,7 @@ end
 
         Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
         state = events |> apply_events(init_state())
+        last_event_id = if length(events) > 0, do: List.last(events).id, else: nil
 
         Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
 
@@ -86,7 +89,8 @@ end
           %{
             correlation_id: correlation_id,
             internal_state: state,
-            last_touch: NaiveDateTime.utc_now()
+            last_touch: NaiveDateTime.utc_now(),
+            snapshot: AggregateSnapshotState.new(correlation_id, last_event_id)
           }
         }
       end
@@ -160,7 +164,7 @@ end
       # Privates
       defp command_internal(
              command,
-             %{correlation_id: correlation_id, internal_state: internal_state} = state
+             %{correlation_id: correlation_id, internal_state: internal_state, snapshot: snapshot} = state
            ) do
         case handle_command(command, internal_state) do
           {:managed, events} ->
@@ -172,7 +176,13 @@ end
             new_internal_state = apply_events(events, internal_state)
             trigger(events)
 
-            {:reply, :managed, %{state | internal_state: new_internal_state}}
+            snapshot =
+              snapshot
+              |> AggregateSnapshotState.increment_events_to_snapshot(length(events))
+              |> AggregateSnapshotState.set_last_event(List.last(events))
+              |> AggregateSnapshotState.snap_if_needed(new_internal_state)
+
+            {:reply, :managed, %{state | internal_state: new_internal_state, snapshot: snapshot}}
 
           err ->
             err = after_command(err)

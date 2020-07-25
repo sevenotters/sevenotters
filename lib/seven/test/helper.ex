@@ -6,9 +6,8 @@ defmodule Seven.Test.Helper do
   def unique_email, do: UUID.uuid4(:hex) <> "@gmail.com"
   def unique_id, do: UUID.uuid4(:hex) |> String.slice(0, 24)
 
-  def drop_events do
-    ~w{events} |> Seven.Data.Persistence.drop_collections()
-  end
+  def drop_events, do: Seven.Data.Persistence.drop_collections(["events"])
+  def drop_snapshots, do: Seven.Data.Persistence.drop_collections(["snapshots"])
 
   def clean_projections do
     # Projections can be already loaded before cleaning events, clean it

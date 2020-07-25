@@ -24,6 +24,11 @@ defmodule Seven.Data.InMemory do
     GenServer.cast(__MODULE__, {:insert, [collection, value]})
   end
 
+  @spec upsert(bitstring, map, map) :: any
+  def upsert(collection, filter, value) do
+    GenServer.cast(__MODULE__, {:upsert, [collection, filter, value]})
+  end
+
   @spec new_id :: any
   def new_id, do: UUID.uuid4(:hex)
 
@@ -114,6 +119,20 @@ defmodule Seven.Data.InMemory do
   def handle_cast({:insert, [collection, value]}, state) do
     items = state |> Map.get(collection, [])
     state = state |> Map.put(collection, items ++ [value])
+    {:noreply, state}
+  end
+
+  def handle_cast({:upsert, [collection, _filter, value]}, state) do
+    items = state |> Map.get(collection, [])
+
+    items =
+      case Enum.find_index(items, fn i -> match?(_filter, i) end) do
+        nil   -> items ++ [value]
+        index -> put_in(items, [Access.at(index)], value)
+      end
+
+    state = state |> Map.put(collection, items)
+
     {:noreply, state}
   end
 end
