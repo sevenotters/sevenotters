@@ -11,12 +11,13 @@ defmodule Seven.Utils.AggregateSnapshotState do
     events_to_snapshot: 0
   ]
 
-  def new(correlation_id, last_event_id) do
-    %__MODULE__{correlation_id: correlation_id, last_event_id: last_event_id}
+  def new(correlation_id) do
+    %__MODULE__{correlation_id: correlation_id}
   end
 
-  def set_last_event(%__MODULE__{} = snapshot, event) do
-    Map.put(snapshot, :last_event_id, event.id)
+  def update_last_event(%__MODULE__{} = snapshot, []), do: snapshot
+  def update_last_event(%__MODULE__{} = snapshot, events) do
+    Map.put(snapshot, :last_event_id, List.last(events).id)
   end
 
   def increment_events_to_snapshot(%__MODULE__{} = snapshot, num_events) do

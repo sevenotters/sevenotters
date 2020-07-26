@@ -81,16 +81,19 @@ end
 
         Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
         state = events |> apply_events(init_state())
-        last_event_id = if length(events) > 0, do: List.last(events).id, else: nil
 
         Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
+
+        snapshot =
+          AggregateSnapshotState.new(correlation_id)
+          |> AggregateSnapshotState.update_last_event(events)
 
         {:noreply,
           %{
             correlation_id: correlation_id,
             internal_state: state,
             last_touch: NaiveDateTime.utc_now(),
-            snapshot: AggregateSnapshotState.new(correlation_id, last_event_id)
+            snapshot: snapshot
           }
         }
       end
@@ -179,7 +182,7 @@ end
             snapshot =
               snapshot
               |> AggregateSnapshotState.increment_events_to_snapshot(length(events))
-              |> AggregateSnapshotState.set_last_event(List.last(events))
+              |> AggregateSnapshotState.update_last_event(events)
               |> AggregateSnapshotState.snap_if_needed(new_internal_state)
 
             {:reply, :managed, %{state | internal_state: new_internal_state, snapshot: snapshot}}
