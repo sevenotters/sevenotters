@@ -6,9 +6,6 @@ defmodule Seven.EventStore.EventStore do
   alias Seven.Data.Persistence
   alias Seven.EventStore.State
 
-  @events_collection "events"
-  @counter_field :counter
-
   # API
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
@@ -42,16 +39,16 @@ defmodule Seven.EventStore.EventStore do
   # Callbacks
   def init(:ok) do
     Seven.Log.info("#{__MODULE__} started.")
-    Persistence.initialize(@events_collection)
+    Persistence.initialize()
 
-    next_counter = Persistence.max_in_collection(@events_collection, @counter_field) + State.counter_step()
+    next_counter = Persistence.max_counter_in_events() + State.counter_step()
     Seven.Log.debug("Next event counter: #{next_counter}")
 
     {:ok, State.init(next_counter)}
   end
 
   def handle_call(:state, _from, state),
-    do: {:reply, %{event_store: state, events: Persistence.content(@events_collection)}, state}
+    do: {:reply, %{event_store: state, events: Persistence.events()}, state}
 
   def handle_call({:subscribe, event_type, pid}, _from, state) do
     new_state = State.subscribe_pid_to_event(state, pid, event_type)
@@ -64,23 +61,20 @@ defmodule Seven.EventStore.EventStore do
   end
 
   def handle_call({:events_by_correlation_id, correlation_id}, _from, state) do
-    sort_expression = Persistence.sort_expression()
-    events = Persistence.content_by_correlation_id(@events_collection, correlation_id, sort_expression) |> to_events
+    events = Persistence.events_by_correlation_id(correlation_id) |> to_events
     {:reply, events, state}
   end
 
   def handle_call({:events_by_types, types}, _from, state) do
-    sort_expression = Persistence.sort_expression()
-
     events =
-      Persistence.content_by_types(@events_collection, types, sort_expression)
+      Persistence.events_by_types(types)
       |> to_events
 
     {:reply, events, state}
   end
 
   def handle_cast({:fire, event}, state) do
-    event = Map.put(event, @counter_field, State.next_counter(state))
+    event = Map.put(event, :counter, State.next_counter(state))
     persist(event)
 
     Seven.Log.event_fired(event)
@@ -112,5 +106,5 @@ defmodule Seven.EventStore.EventStore do
     broadcast(tail, event)
   end
 
-  defp persist(event), do: Persistence.insert(@events_collection, event)
+  defp persist(event), do: Persistence.insert_event(event)
 end

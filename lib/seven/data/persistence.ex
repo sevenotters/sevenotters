@@ -9,16 +9,16 @@ defmodule Seven.Data.Persistence do
     persistence()
   end
 
-  @spec initialize(bitstring) :: any
-  def initialize(collection), do: persistence().initialize(collection)
+  @spec initialize() :: any
+  def initialize(), do: persistence().initialize()
 
-  @spec insert(bitstring, map) :: any
-  def insert(collection, %{__struct__: _} = value),
-    do: persistence().insert(collection, value |> Map.from_struct())
+  @spec insert_event(map) :: any
+  def insert_event(%{__struct__: _} = value),
+    do: persistence().insert_event(value |> Map.from_struct())
 
-  @spec upsert(bitstring, map, map) :: any
-  def upsert(collection, filter, %{__struct__: _} = value),
-    do: persistence().upsert(collection, filter, value |> Map.from_struct())
+  @spec upsert_snapshot(map, map) :: any
+  def upsert_snapshot(correlation_id, %{__struct__: _} = value),
+    do: persistence().upsert_snapshot(correlation_id, value |> Map.from_struct())
 
   @spec new_id :: map
   def new_id, do: persistence().new_id()
@@ -33,28 +33,31 @@ defmodule Seven.Data.Persistence do
   @spec object_id(bitstring) :: any
   def object_id(id), do: persistence().object_id(id)
 
-  @spec max_in_collection(bitstring, atom) :: integer
-  def max_in_collection(collection, field), do: persistence().max_in_collection(collection, field)
+  @spec max_counter_in_events() :: integer
+  def max_counter_in_events(), do: persistence().max_counter_in_events()
 
-  @spec content_by_correlation_id(bitstring, bitstring, any) :: [map]
-  def content_by_correlation_id(collection, correlation_id, sort),
-    do: persistence().content_by_correlation_id(collection, correlation_id, sort)
+  @spec events_by_correlation_id(bitstring) :: [map]
+  def events_by_correlation_id(correlation_id),
+    do: persistence().events_by_correlation_id(correlation_id)
 
-  @spec content_by_types(bitstring, [bitstring], any) :: [map]
-  def content_by_types(collection, types, sort),
-    do: persistence().content_by_types(collection, types, sort)
+  @spec events_by_types([bitstring]) :: [map]
+  def events_by_types(types),
+    do: persistence().events_by_types(types)
 
-  @spec content(bitstring) :: [map]
-  def content(collection), do: persistence().content(collection)
+  @spec events() :: [map]
+  def events(), do: persistence().events()
 
-  @spec drop_collections([bitstring]) :: any
-  def drop_collections(collections), do: persistence().drop_collections(collections)
+  @spec snapshots() :: [map]
+  def snapshots(), do: persistence().snapshots()
+
+  @spec drop_events() :: any
+  def drop_events(), do: persistence().drop_events()
+
+  @spec drop_snapshots() :: any
+  def drop_snapshots(), do: persistence().drop_snapshots()
 
   @spec is_valid_id?(any) :: boolean
   def is_valid_id?(id), do: persistence().is_valid_id?(id)
-
-  @spec sort_expression() :: atom
-  def sort_expression(), do: persistence().sort_expression()
 
   defp persistence, do: Application.get_env(:seven, :persistence) || Seven.Data.InMemory
 end

@@ -3,7 +3,6 @@ defmodule Seven.Utils.AggregateSnapshotState do
   alias Seven.Data.Persistence
 
   @events_for_snapshot 100
-  @snapshots_collection "snapshots"
 
   defstruct [
     correlation_id: nil,
@@ -39,7 +38,7 @@ defmodule Seven.Utils.AggregateSnapshotState do
         state: state |> :erlang.term_to_binary()
       }
 
-    Persistence.upsert(@snapshots_collection, %{correlation_id: snapshot.correlation_id}, snap)
+    Persistence.upsert_snapshot(snapshot.correlation_id, snap)
     Map.put(snapshot, :events_to_snapshot, 0)
   end
 end

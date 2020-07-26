@@ -7,26 +7,26 @@ defmodule Seven.Data.InMemory do
 
   @id_regex ~r/^[A-Fa-f0-9\-]{24}$/
 
+  defstruct events: [], snapshots: []
+
   def start_link(opts \\ []) do
     Log.info("Persistence is InMemory")
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  def init(_opts) do
-    {:ok, %{}}
+  def init(_opts), do: {:ok, %__MODULE__{}}
+
+  @spec initialize() :: any
+  def initialize(), do: nil
+
+  @spec insert_event(map) :: any
+  def insert_event(value) do
+    GenServer.cast(__MODULE__, {:insert_event, value})
   end
 
-  @spec initialize(String.t()) :: any
-  def initialize(_collection), do: nil
-
-  @spec insert(String.t(), Map.t()) :: any
-  def insert(collection, value) do
-    GenServer.cast(__MODULE__, {:insert, [collection, value]})
-  end
-
-  @spec upsert(bitstring, map, map) :: any
-  def upsert(collection, filter, value) do
-    GenServer.cast(__MODULE__, {:upsert, [collection, filter, value]})
+  @spec upsert_snapshot(bitstring, map) :: any
+  def upsert_snapshot(correlation_id, value) do
+    GenServer.cast(__MODULE__, {:upsert_snapshot, [correlation_id, value]})
   end
 
   @spec new_id :: any
@@ -35,104 +35,88 @@ defmodule Seven.Data.InMemory do
   @spec new_printable_id :: bitstring
   def new_printable_id, do: new_id()
 
-  @spec printable_id(any) :: String.t()
+  @spec printable_id(any) :: bitstring
   def printable_id(id) when is_bitstring(id), do: id
 
-  @spec object_id(String.t()) :: any
+  @spec object_id(bitstring) :: any
   def object_id(id), do: id
 
-  @spec is_valid_id?(any) :: Boolean.t()
+  @spec is_valid_id?(any) :: boolean
   def is_valid_id?(id) when is_bitstring(id), do: Regex.match?(@id_regex, id)
 
-  @spec max_in_collection(String.t(), atom) :: Int.t()
-  def max_in_collection(collection, field) do
-    GenServer.call(__MODULE__, {:max_in_collection, collection, field})
+  @spec max_counter_in_events() :: integer
+  def max_counter_in_events(), do: GenServer.call(__MODULE__, :max_counter_in_events)
+
+  @spec events_by_correlation_id(bitstring) :: [map]
+  def events_by_correlation_id(correlation_id) do
+    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id})
   end
 
-  @spec content_by_correlation_id(String.t(), String.t(), atom()) :: List.t()
-  def content_by_correlation_id(collection, correlation_id, sort_field) do
-    GenServer.call(__MODULE__, {:content_by_correlation_id, collection, correlation_id, sort_field})
+  @spec events_by_types([bitstring]) :: [map]
+  def events_by_types(types) do
+    GenServer.call(__MODULE__, {:events_by_types, types})
   end
 
-  @spec content_by_types(String.t(), [String.t()], atom()) :: List.t()
-  def content_by_types(collection, types, sort_field) do
-    GenServer.call(__MODULE__, {:content_by_types, collection, types, sort_field})
-  end
+  @spec events() :: [map]
+  def events(), do: GenServer.call(__MODULE__, :events)
 
-  @spec content(String.t()) :: List.t()
-  def content(collection) do
-    GenServer.call(__MODULE__, {:content, collection})
-  end
+  @spec snapshots() :: [map]
+  def snapshots(), do: GenServer.call(__MODULE__, :snapshots)
 
-  @spec drop_collections(List.t()) :: any
-  def drop_collections(collections) do
-    GenServer.call(__MODULE__, {:drop_collections, collections})
-  end
+  @spec drop_events() :: any
+  def drop_events(), do: GenServer.call(__MODULE__, :drop_events)
 
-  @spec sort_expression() :: any
-  def sort_expression(), do: :counter
+  @spec drop_snapshots() :: any
+  def drop_snapshots(), do: GenServer.call(__MODULE__, :drop_snapshots)
 
   #
   # Callbacks
   #
-  def handle_call({:max_in_collection, collection, field}, _from, state) do
-    items =
-      state
-      |> Map.get(collection, [])
-      |> Enum.max_by(&Map.fetch(&1, field), fn -> 0 end)
-
+  def handle_call(:max_counter_in_events, _from, %{events: events} = state) do
+    items = events |> Enum.max_by(&Map.fetch(&1, :counter), fn -> 0 end)
     {:reply, items, state}
   end
 
-  def handle_call({:content_by_types, collection, types, sort_field}, _from, state) do
-    items =
-      state
-      |> Map.get(collection, [])
-      |> Enum.filter(fn i -> i.type in types end)
-      |> Enum.sort_by(&Map.fetch(&1, sort_field))
+  def handle_call({:events_by_types, types}, _from, %{events: events} = state) do
+    events =
+      events
+      |> Enum.filter(fn e -> e.type in types end)
+      |> Enum.sort_by(&Map.fetch(&1, :counter))
 
-    {:reply, items, state}
+    {:reply, events, state}
   end
 
-  def handle_call({:content_by_correlation_id, collection, correlation_id, sort_field}, _from, state) do
-    filter = %{correlation_id: correlation_id}
+  def handle_call({:events_by_correlation_id, correlation_id}, _from, %{events: events} = state) do
+    _filter = %{correlation_id: correlation_id}
+    events =
+      events
+      |> Enum.filter(fn e -> match?(_filter, e) end)
+      |> Enum.sort_by(&Map.fetch(&1, :counter))
 
-    items =
-      state
-      |> Map.get(collection, [])
-      |> Enum.filter(fn i -> match?(^filter, i) end)
-      |> Enum.sort_by(&Map.fetch(&1, sort_field))
-
-    {:reply, items, state}
+    {:reply, events, state}
   end
 
-  def handle_call({:content, collection}, _from, state) do
-    items = state |> Map.get(collection, [])
-    {:reply, items, state}
+  def handle_call(:events, _from, %{events: events} = state), do: {:reply, events, state}
+
+  def handle_call(:snapshots, _from, %{snapshots: snapshots} = state), do: {:reply, snapshots, state}
+
+  def handle_call(:drop_events, _from, state), do: {:reply, nil, %{state | events: []}}
+
+  def handle_call(:drop_snapshots, _from, state), do: {:reply, nil, %{state | snapshots: []}}
+
+  def handle_cast({:insert_event, value}, state) do
+    {:noreply, %{state | events: state.events ++ [value]}}
   end
 
-  def handle_call({:drop_collections, collections}, _from, state) do
-    state = collections |> Enum.reduce(state, fn c, state -> state |> Map.put(c, []) end)
-    {:reply, nil, state}
-  end
+  def handle_cast({:upsert_snapshot, [correlation_id, value]}, %{snapshots: snapshots} = state) do
+    _filter = %{correlation_id: correlation_id}
 
-  def handle_cast({:insert, [collection, value]}, state) do
-    items = state |> Map.get(collection, [])
-    state = state |> Map.put(collection, items ++ [value])
-    {:noreply, state}
-  end
-
-  def handle_cast({:upsert, [collection, _filter, value]}, state) do
-    items = state |> Map.get(collection, [])
-
-    items =
-      case Enum.find_index(items, fn i -> match?(_filter, i) end) do
-        nil   -> items ++ [value]
-        index -> put_in(items, [Access.at(index)], value)
+    snapshots =
+      case Enum.find_index(snapshots, fn s -> match?(_filter, s) end) do
+        nil   -> snapshots ++ [value]
+        index -> put_in(snapshots, [Access.at(index)], value)
       end
 
-    state = state |> Map.put(collection, items)
-
-    {:noreply, state}
+    {:noreply, %{state | snapshots: snapshots}}
   end
 end
