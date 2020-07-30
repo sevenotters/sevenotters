@@ -3,7 +3,7 @@ defmodule Seven.Data.InMemory do
   use GenServer
   alias Seven.Log
 
-  @behaviour SevenottersPersistence.Storage
+  @behaviour Seven.Data.PersistenceBehaviour
 
   @id_regex ~r/^[A-Fa-f0-9\-]{24}$/
 
@@ -29,6 +29,11 @@ defmodule Seven.Data.InMemory do
     GenServer.cast(__MODULE__, {:upsert_snapshot, [correlation_id, value]})
   end
 
+  @spec get_snapshot(bitstring) :: map | nil
+  def get_snapshot(correlation_id) do
+    GenServer.call(__MODULE__, {:get_snapshot, correlation_id})
+  end
+
   @spec new_id :: any
   def new_id, do: UUID.uuid4(:hex)
 
@@ -47,9 +52,14 @@ defmodule Seven.Data.InMemory do
   @spec max_counter_in_events() :: integer
   def max_counter_in_events(), do: GenServer.call(__MODULE__, :max_counter_in_events)
 
-  @spec events_by_correlation_id(bitstring) :: [map]
-  def events_by_correlation_id(correlation_id) do
-    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id})
+  @spec events_by_correlation_id(bitstring, nil | integer) :: [map]
+  def events_by_correlation_id(correlation_id, after_counter) do
+    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter})
+  end
+
+  @spec event_by_id(bitstring) :: map
+  def event_by_id(id) do
+    GenServer.call(__MODULE__, {:event_by_id, id})
   end
 
   @spec events_by_types([bitstring]) :: [map]
@@ -72,6 +82,11 @@ defmodule Seven.Data.InMemory do
   #
   # Callbacks
   #
+  def handle_call({:get_snapshot, correlation_id}, _from, %{snapshots: snapshots} = state) do
+    snap = snapshots |> Enum.find(fn s -> s.correlation_id == correlation_id end)
+    {:reply, snap, state}
+  end
+
   def handle_call(:max_counter_in_events, _from, %{events: events} = state) do
     items = events |> Enum.max_by(&Map.fetch(&1, :counter), fn -> 0 end)
     {:reply, items, state}
@@ -86,14 +101,18 @@ defmodule Seven.Data.InMemory do
     {:reply, events, state}
   end
 
-  def handle_call({:events_by_correlation_id, correlation_id}, _from, %{events: events} = state) do
-    _filter = %{correlation_id: correlation_id}
+  def handle_call({:events_by_correlation_id, correlation_id, after_counter}, _from, %{events: events} = state) do
     events =
       events
-      |> Enum.filter(fn e -> match?(_filter, e) end)
+      |> Enum.filter(fn e -> e.correlation_id == correlation_id end)
+      |> filter_after_counter(after_counter)
       |> Enum.sort_by(&Map.fetch(&1, :counter))
 
     {:reply, events, state}
+  end
+
+  def handle_call({:event_by_id, id}, _from, %{events: events} = state) do
+    {:reply, Enum.find(events, fn e -> e.id == id end), state}
   end
 
   def handle_call(:events, _from, %{events: events} = state), do: {:reply, events, state}
@@ -104,15 +123,18 @@ defmodule Seven.Data.InMemory do
 
   def handle_call(:drop_snapshots, _from, state), do: {:reply, nil, %{state | snapshots: []}}
 
+  defp filter_after_counter(events, -1), do: events
+  defp filter_after_counter(events, counter) do
+    Enum.filter(events, fn e -> e.counter > counter end)
+  end
+
   def handle_cast({:insert_event, value}, state) do
     {:noreply, %{state | events: state.events ++ [value]}}
   end
 
   def handle_cast({:upsert_snapshot, [correlation_id, value]}, %{snapshots: snapshots} = state) do
-    _filter = %{correlation_id: correlation_id}
-
     snapshots =
-      case Enum.find_index(snapshots, fn s -> match?(_filter, s) end) do
+      case Enum.find_index(snapshots, fn s -> s.correlation_id == correlation_id end) do
         nil   -> snapshots ++ [value]
         index -> put_in(snapshots, [Access.at(index)], value)
       end

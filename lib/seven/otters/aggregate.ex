@@ -57,8 +57,17 @@ defmodule Seven.Otters.Aggregate do
         {:ok, pid}
       end
 
-      @spec command(PID.t(), Map.t()) :: any
-      def command(pid, command), do: GenServer.call(pid, {:command, command})
+      @spec command(pid, map) :: any
+      def command(pid, command) do
+        try do
+          GenServer.call(pid, {:command, command})
+        catch
+          :exit, {:noproc, _} -> Seven.Log.error("""
+          Call to dead aggregate: it happens when aggregate has just been killed
+          but not removed yet from Registry
+          """)
+        end
+      end
 
       @spec state(pid) :: any
       def state(pid), do: GenServer.call(pid, :state)
@@ -77,16 +86,7 @@ end
       def handle_continue(:rehydrate, correlation_id) do
         Seven.Log.debug("Init (#{inspect(self())}): #{inspect(correlation_id)}")
 
-        events = Seven.EventStore.EventStore.events_by_correlation_id(correlation_id)
-
-        Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
-        state = events |> apply_events(init_state())
-
-        Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
-
-        snapshot =
-          AggregateSnapshotState.new(correlation_id)
-          |> AggregateSnapshotState.update_last_event(events)
+        {state, snapshot} = rehydrate(correlation_id, AggregateSnapshotState.get_snap(correlation_id))
 
         {:noreply,
           %{
@@ -181,8 +181,7 @@ end
 
             snapshot =
               snapshot
-              |> AggregateSnapshotState.increment_events_to_snapshot(length(events))
-              |> AggregateSnapshotState.update_last_event(events)
+              |> AggregateSnapshotState.add_events(events)
               |> AggregateSnapshotState.snap_if_needed(new_internal_state)
 
             {:reply, :managed, %{state | internal_state: new_internal_state, snapshot: snapshot}}
@@ -234,6 +233,38 @@ end
         msg
       end
       defp after_command(err), do: err
+
+      defp rehydrate(correlation_id, nil) do
+        events = Seven.EventStore.EventStore.events_by_correlation_id(correlation_id)
+
+        Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
+        state = apply_events(events, init_state())
+
+        Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
+
+        snapshot =
+          AggregateSnapshotState.new(correlation_id)
+          |> AggregateSnapshotState.add_events(events)
+
+        {state, snapshot}
+      end
+
+      defp rehydrate(correlation_id, snapshot) do
+        snapshot = struct(AggregateSnapshotState, snapshot)
+        last_seen_event = Seven.EventStore.EventStore.event_by_id(snapshot.last_event_id)
+        new_events = Seven.EventStore.EventStore.events_by_correlation_id(correlation_id, last_seen_event.counter)
+
+        Seven.Log.info("Processing #{length(new_events)} events for #{inspect(correlation_id)}.")
+        state = apply_events(new_events, AggregateSnapshotState.get_state(snapshot.state))
+
+        Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
+
+        snapshot =
+          AggregateSnapshotState.new(snapshot)
+          |> AggregateSnapshotState.add_events(new_events)
+
+        {state, snapshot}
+      end
 
       @before_compile Seven.Otters.Aggregate
     end

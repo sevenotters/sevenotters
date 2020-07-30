@@ -36,9 +36,13 @@ defmodule Seven.Data.Persistence do
   @spec max_counter_in_events() :: integer
   def max_counter_in_events(), do: persistence().max_counter_in_events()
 
-  @spec events_by_correlation_id(bitstring) :: [map]
-  def events_by_correlation_id(correlation_id),
-    do: persistence().events_by_correlation_id(correlation_id)
+  @spec events_by_correlation_id(bitstring, integer) :: [map]
+  def events_by_correlation_id(correlation_id, after_counter),
+    do: persistence().events_by_correlation_id(correlation_id, after_counter)
+
+  @spec event_by_id(bitstring) :: map
+  def event_by_id(id),
+    do: persistence().event_by_id(id)
 
   @spec events_by_types([bitstring]) :: [map]
   def events_by_types(types),
@@ -49,6 +53,9 @@ defmodule Seven.Data.Persistence do
 
   @spec snapshots() :: [map]
   def snapshots(), do: persistence().snapshots()
+
+  @spec get_snapshot(bitstring) :: map | nil
+  def get_snapshot(correlation_id), do: persistence().get_snapshot(correlation_id)
 
   @spec drop_events() :: any
   def drop_events(), do: persistence().drop_events()

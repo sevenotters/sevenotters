@@ -13,13 +13,14 @@ With no order:
 - [x] Event store
     - [x] InMemory support
     - [x] MongoDb support
-    - [x] Elasticsearch support
+    - [ ] (EventStore)[https://eventstore.com] support
+    - [x] Elasticsearch support - retired
     - [x] Abstract for different stores beyond Mongo 
 - [x] Event structure
 - [x] Command
 - [x] Command bus
 - [x] Aggregate
-    - [ ] Snapshot implementation
+    - [X] Snapshot implementation
     - [ ] Unit test documentation
 - [x] Policy
     - [ ] Unit test documentation
@@ -38,6 +39,12 @@ With no order:
 - [ ] Generating Seven Otters project template (to analyze)
 - [ ] Authentication support (to a different project as helper library)
 - [ ] Authorization support (to a different project as helper library)
+- [ ] graphical representations among otters/commands/events
+- [ ] specification test template
+
+- [ ] Improving events management (create/read/versioning)
+- [ ] Improving correlation id in events (even custom ids)
+- [ ] Improving pagination reading events (with cursor? stream?)
 
 ## Feedback
 Feel free to send feedback to <seven.otters.project@gmail.com>

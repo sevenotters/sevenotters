@@ -53,7 +53,6 @@ defmodule Seven.Mixfile do
       {:bunt, "~> 0.2"},
       {:credo, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:sevenotters_persistence, "~> 0.1"},
       {:uuid, "~> 1.1.8"}
     ]
   end

@@ -7,21 +7,31 @@ defmodule Seven.Utils.AggregateSnapshotState do
   defstruct [
     correlation_id: nil,
     last_event_id: nil,
-    events_to_snapshot: 0
+    events_to_snapshot: 0,
+    created_at: nil,
+    state: nil
   ]
+
+  def new(%__MODULE__{} = snapshot) do
+    %__MODULE__{
+      correlation_id: snapshot.correlation_id,
+      last_event_id: snapshot.last_event_id,
+      events_to_snapshot: snapshot.events_to_snapshot
+    }
+  end
 
   def new(correlation_id) do
     %__MODULE__{correlation_id: correlation_id}
   end
 
-  def update_last_event(%__MODULE__{} = snapshot, []), do: snapshot
-  def update_last_event(%__MODULE__{} = snapshot, events) do
-    Map.put(snapshot, :last_event_id, List.last(events).id)
+  def add_events(%__MODULE__{} = snapshot, []), do: snapshot
+  def add_events(%__MODULE__{} = snapshot, events) do
+    %{snapshot | events_to_snapshot: snapshot.events_to_snapshot + length(events), last_event_id: List.last(events).id}
   end
 
-  def increment_events_to_snapshot(%__MODULE__{} = snapshot, num_events) do
-    Map.put(snapshot, :events_to_snapshot, snapshot.events_to_snapshot + num_events)
-  end
+  def get_snap(correlation_id), do: Persistence.get_snapshot(correlation_id)
+
+  def get_state(binary_state), do: :erlang.binary_to_term(binary_state)
 
   def snap_if_needed(%__MODULE__{} = snapshot, state) do
     need = snapshot.events_to_snapshot >= @events_for_snapshot
@@ -30,15 +40,15 @@ defmodule Seven.Utils.AggregateSnapshotState do
 
   defp snap_now(false, snapshot, _state), do: snapshot
   defp snap_now(_, snapshot, state) do
-    snap =
-      %Seven.Utils.Snapshot{
-        correlation_id: snapshot.correlation_id,
-        created_at: NaiveDateTime.utc_now() |> NaiveDateTime.to_iso8601(),
-        last_event_id: snapshot.last_event_id,
-        state: state |> :erlang.term_to_binary()
-      }
+    snapshot = Map.put(snapshot, :events_to_snapshot, 0)
 
-    Persistence.upsert_snapshot(snapshot.correlation_id, snap)
-    Map.put(snapshot, :events_to_snapshot, 0)
+    snap =
+      new(snapshot)
+      |> Map.put(:created_at, NaiveDateTime.utc_now() |> NaiveDateTime.to_iso8601())
+      |> Map.put(:state, state |> :erlang.term_to_binary())
+
+    Persistence.upsert_snapshot(snap.correlation_id, snap)
+
+    snapshot
   end
 end
