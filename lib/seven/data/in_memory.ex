@@ -52,7 +52,7 @@ defmodule Seven.Data.InMemory do
   @spec max_counter_in_events() :: integer
   def max_counter_in_events(), do: GenServer.call(__MODULE__, :max_counter_in_events)
 
-  @spec events_by_correlation_id(bitstring, nil | integer) :: [map]
+  @spec events_by_correlation_id(bitstring, integer) :: [map]
   def events_by_correlation_id(correlation_id, after_counter) do
     GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter})
   end
@@ -62,9 +62,9 @@ defmodule Seven.Data.InMemory do
     GenServer.call(__MODULE__, {:event_by_id, id})
   end
 
-  @spec events_by_types([bitstring]) :: [map]
-  def events_by_types(types) do
-    GenServer.call(__MODULE__, {:events_by_types, types})
+  @spec events_by_types([bitstring], integer) :: [map]
+  def events_by_types(types, after_counter) do
+    GenServer.call(__MODULE__, {:events_by_types, types, after_counter})
   end
 
   @spec events() :: [map]
@@ -92,10 +92,11 @@ defmodule Seven.Data.InMemory do
     {:reply, items, state}
   end
 
-  def handle_call({:events_by_types, types}, _from, %{events: events} = state) do
+  def handle_call({:events_by_types, types, after_counter}, _from, %{events: events} = state) do
     events =
       events
       |> Enum.filter(fn e -> e.type in types end)
+      |> filter_after_counter(after_counter)
       |> Enum.sort_by(&Map.fetch(&1, :counter))
 
     {:reply, events, state}

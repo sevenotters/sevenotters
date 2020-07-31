@@ -38,8 +38,8 @@ defmodule Seven.EventStore.EventStore do
   @spec event_by_id(bitstring) :: map
   def event_by_id(id), do: GenServer.call(__MODULE__, {:event_by_id, id})
 
-  @spec events_by_types([String.t()]) :: [Map.t()]
-  def events_by_types(types), do: GenServer.call(__MODULE__, {:events_by_types, types})
+  @spec events_by_types([bitstring], integer) :: [map]
+  def events_by_types(types, after_counter \\ -1), do: GenServer.call(__MODULE__, {:events_by_types, types, after_counter})
 
   # Callbacks
   def init(:ok) do
@@ -72,11 +72,8 @@ defmodule Seven.EventStore.EventStore do
 
   def handle_call({:event_by_id, id}, _from, state), do: {:reply, Persistence.event_by_id(id), state}
 
-  def handle_call({:events_by_types, types}, _from, state) do
-    events =
-      Persistence.events_by_types(types)
-      |> to_events
-
+  def handle_call({:events_by_types, types, after_counter}, _from, state) do
+    events = Persistence.events_by_types(types, after_counter) |> to_events
     {:reply, events, state}
   end
 

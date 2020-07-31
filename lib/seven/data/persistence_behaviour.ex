@@ -15,7 +15,7 @@ defmodule Seven.Data.PersistenceBehaviour do
 
   @callback event_by_id(bitstring) :: map
   @callback events_by_correlation_id(bitstring, integer) :: [map]
-  @callback events_by_types([bitstring]) :: [map]
+  @callback events_by_types([bitstring], integer) :: [map]
   @callback events() :: [map]
   @callback snapshots() :: [map]
   @callback get_snapshot(bitstring) :: map | nil

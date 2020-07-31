@@ -1,4 +1,4 @@
-defmodule Seven.Utils.AggregateSnapshotState do
+defmodule Seven.Utils.Snapshot do
 
   alias Seven.Data.Persistence
 

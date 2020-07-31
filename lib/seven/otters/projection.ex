@@ -7,6 +7,7 @@ defmodule Seven.Otters.Projection do
 
       @test_env Mix.env() == :test
 
+      alias Seven.Utils.Snapshot
       use Seven.Utils.Tagger
       @tag :projection
 
@@ -44,36 +45,43 @@ end
       def handle_continue(:rehydrate, opts) do
         Seven.Log.info("Projection #{registered_name()} started.")
 
-        state =
-          Keyword.get(opts, :subscribe_to_eventstore, true)
-          |> subscribe_and_rehydratate()
+        subscribe = Keyword.get(opts, :subscribe_to_eventstore, true)
+        subscribe_to_event_store(subscribe)
+        {state, snapshot} = rehydratate(subscribe)
 
-        {:noreply, state}
+        {:noreply,
+          %{
+            internal_state: state,
+            snapshot: snapshot
+          }
+        }
       end
 
-      def handle_call({:query, query_filter, params}, _from, state) do
+      def handle_call({:query, query_filter, params}, _from, %{internal_state: internal_state} = state) do
         params = AtomicMap.convert(params, safe: false)
 
         res =
-          case pre_handle_query(query_filter, params, state) do
-            :ok -> handle_query(query_filter, params, state)
+          case pre_handle_query(query_filter, params, internal_state) do
+            :ok -> handle_query(query_filter, params, internal_state)
             err -> err
           end
 
         {:reply, res, state}
       end
 
-      def handle_call({:filter, filter_func}, _from, state),
-        do: {:reply, state |> Enum.filter(filter_func), state}
+      def handle_call({:filter, filter_func}, _from, %{internal_state: internal_state} = state),
+        do: {:reply, internal_state |> Enum.filter(filter_func), state}
 
       def handle_call(:state, _from, state), do: {:reply, state, state}
 
       def handle_call(:pid, _from, state), do: {:reply, self(), state}
-      def handle_call(:clean, _from, state), do: {:reply, :ok, init_state()}
+      def handle_call(:clean, _from, state) do
+        {:reply, :ok, %{state | internal_state: init_state(), snapshot: Snapshot.new(registered_name())}}
+      end
 
-      def handle_call({:send, event}, _from, state) do
+      def handle_call({:send, event}, _from, %{internal_state: internal_state} = state) do
         Seven.Log.event_received(event, registered_name())
-        {:reply, event, handle_event(event, state)}
+        {:reply, event, %{state | internal_state: handle_event(event, internal_state)}}
       end
 
       def terminate(:normal, _state) do
@@ -89,10 +97,16 @@ end
         {:noreply, state}
       end
 
-      def handle_info(%Seven.Otters.Event{} = event, state) do
+      def handle_info(%Seven.Otters.Event{} = event, %{internal_state: internal_state, snapshot: snapshot} = state) do
         Seven.Log.event_received(event, registered_name())
+        new_internal_state = handle_event(event, internal_state)
 
-        {:noreply, handle_event(event, state)}
+        snapshot =
+          snapshot
+          |> Snapshot.add_events([event])
+          |> Snapshot.snap_if_needed(new_internal_state)
+
+        {:noreply, %{state | internal_state: new_internal_state, snapshot: snapshot}}
       end
 
       def handle_info(_, state), do: {:noreply, state}
@@ -102,32 +116,60 @@ end
       #
       @spec apply_events(List.t(), Map.t()) :: Map.t()
       defp apply_events([], state), do: state
-
       defp apply_events([event | events], state) do
         Seven.Log.event_received(event, registered_name())
         new_state = handle_event(event, state)
         apply_events(events, new_state)
       end
 
-      defp subscribe_and_rehydratate(true) do
-        unquote(listener_of_events)
-        |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))
-
+      defp rehydratate_by_snapshot(nil) do
         events =
           unquote(listener_of_events)
           |> Seven.EventStore.EventStore.events_by_types()
 
         Seven.Log.info("Processing #{length(events)} events for #{registered_name()}.")
-        state = events |> apply_events(init_state())
+        state = apply_events(events, init_state())
 
         Seven.Log.info("Projection #{registered_name()} rehydrated")
 
-        state
+        snapshot =
+          Snapshot.new(registered_name())
+          |> Snapshot.add_events(events)
+
+        {state, snapshot}
       end
-      defp subscribe_and_rehydratate(_) do
+      defp rehydratate_by_snapshot(snapshot) do
+        snapshot = struct(Snapshot, snapshot)
+        last_seen_event = Seven.EventStore.EventStore.event_by_id(snapshot.last_event_id)
+        new_events =
+          unquote(listener_of_events)
+          |> Seven.EventStore.EventStore.events_by_types(last_seen_event.counter)
+
+        Seven.Log.info("Processing #{length(new_events)} events for #{registered_name()}.")
+        state = apply_events(new_events, Snapshot.get_state(snapshot.state))
+
+        Seven.Log.info("Projection #{registered_name()} rehydrated")
+
+        snapshot =
+          Snapshot.new(snapshot)
+          |> Snapshot.add_events(new_events)
+
+        {state, snapshot}
+      end
+
+      defp rehydratate(true) do
+        rehydratate_by_snapshot(Snapshot.get_snap(registered_name()))
+      end
+      defp rehydratate(_) do
         Seven.Log.info("Projection #{registered_name()} is not subscribed to EventStore.")
-        init_state()
+        {init_state(), Snapshot.new(registered_name())}
       end
+
+      defp subscribe_to_event_store(true) do
+        unquote(listener_of_events) |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))
+        :ok
+      end
+      defp subscribe_to_event_store(_), do: :ok
 
       defp registered_name() do
         {:registered_name, name} = Process.info(self(), :registered_name)
