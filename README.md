@@ -26,11 +26,11 @@ With no order:
     - [ ] Unit test documentation
 - [x] Service
     - [ ] Unit test documentation
-- [.] Process (TBC)
+- [.] Process (WIP)
     - [ ] Review
     - [ ] Unit test documentation
 - [x] Projection
-    - [ ] Snapshot implementation
+    - [x] Snapshot implementation
     - [ ] Unit test documentation
 - [x] Generic command/query API support (Plug)
     - [ ] To move to different project as helper library

@@ -6,8 +6,13 @@ defmodule Seven.Otters.Command do
   defstruct id: nil,
             type: nil,
             request_id: nil,
+            process_id: nil,
             responder_module: nil,
             payload: %{}
+
+  defdelegate fetch(term, key), to: Map
+  defdelegate get(term, key, default), to: Map
+  defdelegate get_and_update(term, key, fun), to: Map
 
   @spec create(String.t(), Map.t()) :: Map.t()
   def create(type, payload) do

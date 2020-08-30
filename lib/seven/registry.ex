@@ -1,8 +1,8 @@
-defmodule Seven.Aggregates do
+defmodule Seven.Registry do
   @moduledoc false
 
-  @spec get_aggregate(atom, String.t()) :: {:ok, pid}
-  def get_aggregate(handler, correlation_value_id) do
+  @spec get_child(atom, bitstring) :: {:ok, pid}
+  def get_child(handler, correlation_value_id) do
     {key, name} = get_key(handler, correlation_value_id)
 
     case Registry.lookup(:registry, key) do
@@ -12,7 +12,7 @@ defmodule Seven.Aggregates do
     end
   end
 
-  @spec is_loaded(atom, String.t()) :: nil | pid
+  @spec is_loaded(atom, bitstring) :: nil | pid
   def is_loaded(handler, correlation_value_id) do
     {key, _name} = get_key(handler, correlation_value_id)
 

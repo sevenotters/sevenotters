@@ -10,17 +10,15 @@ defmodule Seven.BusinessSupervisor do
 
   # Callback
   def init(:ok) do
-
     registry = [supervisor(Registry, [:unique, :registry])]
 
     opts = [strategy: :one_for_one]
     policies = Seven.Entities.policies() |> additional_workers()
     services = Seven.Entities.services() |> additional_workers()
-    processes = Seven.Entities.processes() |> additional_workers()
     projections = Seven.Entities.projections() |> Map.values() |> additional_workers()
 
     Supervisor.init(
-      policies ++ services ++ processes ++ registry ++ projections,
+      policies ++ services ++ registry ++ projections,
       opts
     )
   end

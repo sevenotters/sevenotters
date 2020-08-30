@@ -33,10 +33,11 @@ defmodule Seven.Otters.Projection do
       @spec clean(atom) :: pid
       def clean(process_name \\ __MODULE__), do: GenServer.call(process_name, :clean)
 
-if @test_env do
-      @spec send(Seven.Otters.Event, atom) :: pid
-      def send(%Seven.Otters.Event{} = e, process_name \\ __MODULE__), do: GenServer.call(process_name, {:send, e})
-end
+      if @test_env do
+        @spec send(Seven.Otters.Event, atom) :: pid
+        def send(%Seven.Otters.Event{} = e, process_name \\ __MODULE__), do: GenServer.call(process_name, {:send, e})
+      end
+
       #
       # Callbacks
       #
@@ -50,11 +51,10 @@ end
         {state, snapshot} = rehydratate(subscribe)
 
         {:noreply,
-          %{
-            internal_state: state,
-            snapshot: snapshot
-          }
-        }
+         %{
+           internal_state: state,
+           snapshot: snapshot
+         }}
       end
 
       def handle_call({:query, query_filter, params}, _from, %{internal_state: internal_state} = state) do
@@ -75,6 +75,7 @@ end
       def handle_call(:state, _from, state), do: {:reply, state, state}
 
       def handle_call(:pid, _from, state), do: {:reply, self(), state}
+
       def handle_call(:clean, _from, state) do
         {:reply, :ok, %{state | internal_state: init_state(), snapshot: Snapshot.new(registered_name())}}
       end
@@ -116,6 +117,7 @@ end
       #
       @spec apply_events(List.t(), Map.t()) :: Map.t()
       defp apply_events([], state), do: state
+
       defp apply_events([event | events], state) do
         Seven.Log.event_received(event, registered_name())
         new_state = handle_event(event, state)
@@ -138,9 +140,11 @@ end
 
         {state, snapshot}
       end
+
       defp rehydratate_by_snapshot(snapshot) do
         snapshot = struct(Snapshot, snapshot)
         last_seen_event = Seven.EventStore.EventStore.event_by_id(snapshot.last_event_id)
+
         new_events =
           unquote(listener_of_events)
           |> Seven.EventStore.EventStore.events_by_types(last_seen_event.counter)
@@ -160,6 +164,7 @@ end
       defp rehydratate(true) do
         rehydratate_by_snapshot(Snapshot.get_snap(registered_name()))
       end
+
       defp rehydratate(_) do
         Seven.Log.info("Projection #{registered_name()} is not subscribed to EventStore.")
         {init_state(), Snapshot.new(registered_name())}
@@ -169,6 +174,7 @@ end
         unquote(listener_of_events) |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))
         :ok
       end
+
       defp subscribe_to_event_store(_), do: :ok
 
       defp registered_name() do
@@ -182,9 +188,9 @@ end
 
   defmacro __before_compile__(_env) do
     quote generated: true do
-      defp handle_event(event, _state), do: raise "Event #{inspect event} is not handled correctly by #{registered_name()}"
-      defp pre_handle_query(query, _params, _state), do: raise "Query #{inspect query} does not exist in #{registered_name()}: missing pre_handle_query()"
-      defp handle_query(query, _params, state), do: raise "Query #{inspect query} does not exist in #{registered_name()}: missing handle_query()"
+      defp handle_event(event, _state), do: raise("Event #{inspect(event)} is not handled correctly by #{registered_name()}")
+      defp pre_handle_query(query, _params, _state), do: raise("Query #{inspect(query)} does not exist in #{registered_name()}: missing pre_handle_query()")
+      defp handle_query(query, _params, state), do: raise("Query #{inspect(query)} does not exist in #{registered_name()}: missing handle_query()")
     end
   end
 end

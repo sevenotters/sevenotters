@@ -78,9 +78,9 @@ defmodule Seven.Sync.ApiCommandRouter do
           quote do
             defp internal_pre_command(%ApiRequest{state: :unmanaged, command: unquote(p[:command])} = req) do
               case unquote(p[:pre_command]).(req) do
-                :ok         -> req
-                {:ok, req}  -> req
-                err         -> %ApiRequest{req | state: err}
+                :ok -> req
+                {:ok, req} -> req
+                err -> %ApiRequest{req | state: err}
               end
             end
           end
@@ -90,7 +90,7 @@ defmodule Seven.Sync.ApiCommandRouter do
       defp internal_pre_command(%ApiRequest{} = req), do: req
 
       defp subscribe_to_event_store(%ApiRequest{state: :unmanaged, wait_for_events: []} = req),
-      do: req
+        do: req
 
       defp subscribe_to_event_store(%ApiRequest{state: :unmanaged, wait_for_events: wait_for_events} = req) when length(wait_for_events) > 0 do
         wait_for_events |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))
@@ -110,7 +110,7 @@ defmodule Seven.Sync.ApiCommandRouter do
           |> Seven.Log.command_request_sent()
           |> Seven.CommandBus.send_command_request()
 
-          %ApiRequest{req | state: res}
+        %ApiRequest{req | state: res}
       end
 
       defp send_command_request(%ApiRequest{} = req), do: req

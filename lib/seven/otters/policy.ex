@@ -56,7 +56,7 @@ defmodule Seven.Otters.Policy do
 
   defmacro __before_compile__(_env) do
     quote generated: true do
-      defp handle_event(event), do: raise "Event #{inspect event} is not handled correctly by #{__MODULE__}"
+      defp handle_event(event), do: raise("Event #{inspect(event)} is not handled correctly by #{__MODULE__}")
     end
   end
 end

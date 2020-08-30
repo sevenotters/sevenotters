@@ -1,16 +1,13 @@
 defmodule Seven.Utils.Snapshot do
-
   alias Seven.Data.Persistence
 
   @events_for_snapshot 100
 
-  defstruct [
-    correlation_id: nil,
-    last_event_id: nil,
-    events_to_snapshot: 0,
-    created_at: nil,
-    state: nil
-  ]
+  defstruct correlation_id: nil,
+            last_event_id: nil,
+            events_to_snapshot: 0,
+            created_at: nil,
+            state: nil
 
   def new(%__MODULE__{} = snapshot) do
     %__MODULE__{
@@ -25,6 +22,7 @@ defmodule Seven.Utils.Snapshot do
   end
 
   def add_events(%__MODULE__{} = snapshot, []), do: snapshot
+
   def add_events(%__MODULE__{} = snapshot, events) do
     %{snapshot | events_to_snapshot: snapshot.events_to_snapshot + length(events), last_event_id: List.last(events).id}
   end
@@ -39,6 +37,7 @@ defmodule Seven.Utils.Snapshot do
   end
 
   defp snap_now(false, snapshot, _state), do: snapshot
+
   defp snap_now(_, snapshot, state) do
     snapshot = Map.put(snapshot, :events_to_snapshot, 0)
 

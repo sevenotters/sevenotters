@@ -62,10 +62,11 @@ defmodule Seven.Otters.Aggregate do
         try do
           GenServer.call(pid, {:command, command})
         catch
-          :exit, {:noproc, _} -> Seven.Log.error("""
-          Call to dead aggregate: it happens when aggregate has just been killed
-          but not removed yet from Registry
-          """)
+          :exit, {:noproc, _} ->
+            Seven.Log.error("""
+            Call to dead aggregate: it happens when aggregate has just been killed
+            but not removed yet from Registry
+            """)
         end
       end
 
@@ -75,10 +76,10 @@ defmodule Seven.Otters.Aggregate do
       @spec data(pid) :: any
       def data(pid), do: GenServer.call(pid, :data)
 
-if @test_env do
-      @spec send(Seven.Otters.Event, atom) :: pid
-      def send(%Seven.Otters.Event{} = e, pid), do: GenServer.call(pid, {:send, e})
-end
+      if @test_env do
+        @spec send(Seven.Otters.Event, atom) :: pid
+        def send(%Seven.Otters.Event{} = e, pid), do: GenServer.call(pid, {:send, e})
+      end
 
       # Callbacks
       def init(correlation_id), do: {:ok, correlation_id, {:continue, :rehydrate}}
@@ -89,13 +90,12 @@ end
         {state, snapshot} = rehydrate(correlation_id, Snapshot.get_snap(correlation_id))
 
         {:noreply,
-          %{
-            correlation_id: correlation_id,
-            internal_state: state,
-            last_touch: NaiveDateTime.utc_now(),
-            snapshot: snapshot
-          }
-        }
+         %{
+           correlation_id: correlation_id,
+           internal_state: state,
+           last_touch: NaiveDateTime.utc_now(),
+           snapshot: snapshot
+         }}
       end
 
       def handle_call(:state, _from, state), do: {:reply, state, state}
@@ -109,23 +109,25 @@ end
         state = %{state | last_touch: NaiveDateTime.utc_now()}
 
         case pre_handle_command(command, internal_state) do
-          :ok -> command_internal(command, state)
+          :ok ->
+            command_internal(command, state)
+
           err ->
             err = after_command(err)
             {:reply, err, state}
-          end
+        end
       end
 
-if @test_env do
-      def handle_call({:send, event}, _from, %{correlation_id: correlation_id, internal_state: internal_state} = state) do
-        event = set_correlation_id(event, correlation_id)
+      if @test_env do
+        def handle_call({:send, event}, _from, %{correlation_id: correlation_id, internal_state: internal_state} = state) do
+          event = set_correlation_id(event, correlation_id)
 
-        Seven.Log.event_received(event, __MODULE__)
-        new_internal_state = handle_event(event, internal_state)
+          Seven.Log.event_received(event, __MODULE__)
+          new_internal_state = handle_event(event, internal_state)
 
-        {:reply, :managed, %{state | internal_state: new_internal_state}}
+          {:reply, :managed, %{state | internal_state: new_internal_state}}
+        end
       end
-end
 
       def terminate(:normal, _state) do
         Seven.Log.debug("Terminating #{__MODULE__}(#{inspect(self())}) for :normal")
@@ -200,10 +202,11 @@ end
       defp set_request_id(events, request_id) when is_list(events),
         do: Enum.map(events, &Map.put(&1, :request_id, request_id))
 
-      @spec set_correlation_id(List.t() | Seven.Otters.Event, Map.t()) :: List.t()
+      @spec set_correlation_id([Seven.Otters.Event] | Seven.Otters.Event, bitstring) :: [Seven.Otters.Event]
       defp set_correlation_id(events, correlation_id) when is_list(events) do
-        events |> Enum.map(fn e -> set_correlation_id(e, correlation_id) end)
+        Enum.map(events, fn e -> set_correlation_id(e, correlation_id) end)
       end
+
       defp set_correlation_id(event, correlation_id), do: Map.put(event, :correlation_id, correlation_id)
 
       @spec create_event(String.t(), Map.t()) :: Map.t()
@@ -232,6 +235,7 @@ end
         Process.send(self(), :useless, [])
         msg
       end
+
       defp after_command(err), do: err
 
       defp rehydrate(correlation_id, nil) do
@@ -278,10 +282,10 @@ end
       defp pre_handle_command(_command, _state), do: :ok
 
       @spec handle_command(Seven.Otters.Command.t(), any) :: any
-      defp handle_command(command, _state), do: raise "Command #{inspect command} is not handled correctly by #{__MODULE__}"
+      defp handle_command(command, _state), do: raise("Command #{inspect(command)} is not handled correctly by #{__MODULE__}")
 
       @spec handle_event(Seven.Otters.Event.t(), any) :: any
-      defp handle_event(event, _state), do: raise "Event #{inspect event} is not handled correctly by #{__MODULE__}"
+      defp handle_event(event, _state), do: raise("Event #{inspect(event)} is not handled correctly by #{__MODULE__}")
     end
   end
 end

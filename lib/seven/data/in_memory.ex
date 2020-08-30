@@ -125,6 +125,7 @@ defmodule Seven.Data.InMemory do
   def handle_call(:drop_snapshots, _from, state), do: {:reply, nil, %{state | snapshots: []}}
 
   defp filter_after_counter(events, -1), do: events
+
   defp filter_after_counter(events, counter) do
     Enum.filter(events, fn e -> e.counter > counter end)
   end
@@ -136,7 +137,7 @@ defmodule Seven.Data.InMemory do
   def handle_cast({:upsert_snapshot, [correlation_id, value]}, %{snapshots: snapshots} = state) do
     snapshots =
       case Enum.find_index(snapshots, fn s -> s.correlation_id == correlation_id end) do
-        nil   -> snapshots ++ [value]
+        nil -> snapshots ++ [value]
         index -> put_in(snapshots, [Access.at(index)], value)
       end
 

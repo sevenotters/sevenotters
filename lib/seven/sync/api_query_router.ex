@@ -32,7 +32,7 @@ defmodule Seven.Sync.ApiQueryRouter do
             defp internal_pre_query(%ApiRequest{state: :unmanaged} = req) do
               case unquote(p[:pre_query]).(req) do
                 :ok -> req
-                {:ok, req}  -> req
+                {:ok, req} -> req
                 err -> %ApiRequest{req | state: err}
               end
             end

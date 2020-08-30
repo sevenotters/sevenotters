@@ -7,6 +7,7 @@ defmodule Seven.Otters.Event do
             type: nil,
             counter: nil,
             request_id: nil,
+            process_id: nil,
             correlation_id: nil,
             correlation_module: nil,
             date: nil,

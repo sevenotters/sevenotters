@@ -31,7 +31,7 @@ defmodule Seven.Test.Helper do
   end
 
   def get_aggregate_state(aggregate_type, correlation_key) do
-    {:ok, pid} = Seven.Aggregates.get_aggregate(aggregate_type, correlation_key)
+    {:ok, pid} = Seven.Registry.get_child(aggregate_type, correlation_key)
     aggregate_type.state(pid).internal_state
   end
 end
