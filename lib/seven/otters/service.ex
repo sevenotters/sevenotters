@@ -8,6 +8,8 @@ defmodule Seven.Otters.Service do
       use Seven.Utils.Tagger
       @tag :service
 
+      alias Seven.Utils.Events
+
       # API
       def start_link(opts \\ []) do
         GenServer.start_link(__MODULE__, :ok, opts ++ [name: __MODULE__])
@@ -33,8 +35,8 @@ defmodule Seven.Otters.Service do
         case handle_command(command) do
           {:managed, events} ->
             events
-            |> set_request_id(command.request_id)
-            |> trigger
+            |> Events.set_request_id(command.request_id)
+            |> Events.trigger
 
             {:reply, :managed, state}
 
@@ -59,20 +61,10 @@ defmodule Seven.Otters.Service do
       def handle_info(msg, state), do: handle_service_info(msg, state)
 
       # Privates
-      @spec set_request_id(List.t(), String.t()) :: List.t()
-      defp set_request_id(events, request_id) when is_list(events),
-        do: Enum.map(events, &Map.put(&1, :request_id, request_id))
 
-      @spec create_event(String.t(), Map.t()) :: Map.t()
-      defp create_event(type, payload) when is_map(payload) do
+      @spec create_event(bitstring, map) :: map
+      defp create_event(type, payload) do
         Seven.Otters.Event.create(type, payload, __MODULE__)
-      end
-
-      defp trigger([]), do: :ok
-
-      defp trigger([event | events]) do
-        Seven.EventStore.EventStore.fire(event)
-        trigger(events)
       end
 
       @before_compile Seven.Otters.Service

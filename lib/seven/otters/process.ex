@@ -1,18 +1,24 @@
 defmodule Seven.Otters.Process do
   @moduledoc false
 
-  defmacro __using__(process_field: process_field) do
+  defmacro __using__(process_field: process_field, listener_of_events: listener_of_events) do
     quote location: :keep do
       use GenServer
 
       use Seven.Utils.Tagger
       @tag :process
 
+      alias Seven.Utils.Events
+
       # API
       def process_field, do: unquote(process_field)
 
       def start_link(process_id, opts \\ []) do
-        GenServer.start_link(__MODULE__, process_id, opts)
+        {:ok, pid} = GenServer.start_link(__MODULE__, process_id, opts)
+
+        subscribe_to_es(pid)
+
+        {:ok, pid}
       end
 
       @spec command(pid, map) :: any
@@ -24,6 +30,7 @@ defmodule Seven.Otters.Process do
       # Callbacks
       def init(process_id) do
         Seven.Log.debug("Init (#{inspect(self())}): #{inspect(process_id)}")
+
         state = %{
           process_id: process_id,
           internal_state: init_state()
@@ -37,26 +44,16 @@ defmodule Seven.Otters.Process do
       def handle_call({:command, command}, _from, state) do
         Seven.Log.debug("#{__MODULE__} received command: #{inspect(command)}")
 
-        case handle_command(command, state.internal_state) do
-          {:continue, events, new_internal_state} ->
-            state = %{state | internal_state: new_internal_state}
+        {next_operation, events, new_internal_state} = handle_command(command, state.process_id, state.internal_state)
+        state = %{state | internal_state: new_internal_state}
+        trigger_events(events, command.request_id, state.process_id)
 
-            events =
-              events
-              |> set_request_id(command.request_id)
-              |> set_correlation_id(state.process_id)
-
-            trigger(events)
-
-
+        case next_operation do
+          :continue ->
             {:reply, :managed, state}
-
-          {:stop, _events} ->
-            # TODO: stop this process
-            {:reply, :stop, state}
-
-          err ->
-            {:reply, err, state}
+          :stop ->
+            unsubscribe_from_es(self())
+            {:stop, :normal, :stop, state}
         end
       end
 
@@ -73,42 +70,58 @@ defmodule Seven.Otters.Process do
         {:noreply, state}
       end
 
+      # incoming events must match with the originating process id
+      def handle_info(%Seven.Otters.Event{process_id: process_id} = event, %{internal_state: internal_state, process_id: process_id} = state) do
+        Seven.Log.event_received(event, __MODULE__)
+
+        {next_operation, events, new_internal_state} = handle_event(event, internal_state)
+        state = %{state | internal_state: new_internal_state}
+        trigger_events(events, event.request_id, state.process_id)
+
+        case next_operation do
+          :continue ->
+            {:noreply, state}
+          :stop ->
+            unsubscribe_from_es(self())
+            {:stop, :normal, state}
+        end
+      end
+
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates
+
+      defp subscribe_to_es(pid) do
+        unquote(listener_of_events)
+        |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, pid))
+      end
+
+      defp unsubscribe_from_es(pid) do
+        unquote(listener_of_events)
+        |> Enum.each(&Seven.EventStore.EventStore.unsubscribe(&1, pid))
+      end
+
+      defp trigger_events(events, request_id, process_id) do
+        events
+        |> Events.set_request_id(request_id)
+        |> Events.set_correlation_id(process_id)
+        |> Events.set_process_id(process_id)
+        |> Events.trigger()
+      end
 
       @spec create_event(bitstring, map) :: map
       defp create_event(type, payload) do
         Seven.Otters.Event.create(type, payload, __MODULE__)
       end
 
-      @spec set_request_id([Seven.Otters.Event], bitstring) :: [Seven.Otters.Event]
-      defp set_request_id(events, request_id),
-        do: Enum.map(events, &Map.put(&1, :request_id, request_id))
-
-      @spec set_correlation_id([Seven.Otters.Event] | Seven.Otters.Event, bitstring) :: [Seven.Otters.Event]
-      defp set_correlation_id(events, correlation_id) when is_list(events) do
-        Enum.map(events, fn e -> set_correlation_id(e, correlation_id) end)
-      end
-
-      defp set_correlation_id(event, correlation_id) do
-        event
-        |> Map.put(:correlation_id, correlation_id)
-        |> Map.put(:process_id, correlation_id)
-      end
-
       defp send_command(%Seven.CommandRequest{} = request, state) do
-        {:ok, proc_field} = Map.fetch(state, process_field())
-
-        %{request | id: Seven.Data.Persistence.new_id() |> Seven.Data.Persistence.printable_id(), process_id: proc_field, sender: __MODULE__}
+        %{request | sender: __MODULE__}
         |> Seven.CommandBus.send_command_request()
       end
 
-      defp trigger([]), do: :ok
-
-      defp trigger([event | events]) do
-        Seven.EventStore.EventStore.fire(event)
-        trigger(events)
+      defp registered_name() do
+        {:registered_name, name} = Process.info(self(), :registered_name)
+        name
       end
 
       @before_compile Seven.Otters.Process
@@ -117,6 +130,8 @@ defmodule Seven.Otters.Process do
 
   defmacro __before_compile__(_env) do
     quote generated: true do
+      def route(_command, _params), do: :not_routed
+      defp handle_event(event, _state), do: raise("Event #{inspect(event)} is not handled correctly by #{registered_name()}")
       defp handle_command(command), do: raise("Command #{inspect(command)} is not handled correctly by #{__MODULE__}")
     end
   end

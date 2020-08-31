@@ -12,7 +12,7 @@ defmodule Seven.Otters.Policy do
       def start_link(opts \\ []) do
         {:ok, pid} = GenServer.start_link(__MODULE__, {:ok, nil}, opts ++ [name: __MODULE__])
 
-        # subscribe my events in store [TODO: put in init()]
+        # subscribe my events in store
         unquote(listener_of_events)
         |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, pid))
 

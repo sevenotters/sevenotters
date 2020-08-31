@@ -42,7 +42,7 @@ defmodule Seven.Otters.Aggregate do
       @max_lifetime_minutes Application.get_env(:seven, :aggregate_lifetime) || 60
       @lifetime_minutes_check div(@max_lifetime_minutes, 2)
 
-      alias Seven.Utils.Snapshot
+      alias Seven.Utils.{Events, Snapshot}
 
       # API
       def aggregate_field, do: unquote(aggregate_field)
@@ -120,7 +120,7 @@ defmodule Seven.Otters.Aggregate do
 
       if @test_env do
         def handle_call({:send, event}, _from, %{correlation_id: correlation_id, internal_state: internal_state} = state) do
-          event = set_correlation_id(event, correlation_id)
+          event = Events.set_correlation_id(event, correlation_id)
 
           Seven.Log.event_received(event, __MODULE__)
           new_internal_state = handle_event(event, internal_state)
@@ -167,22 +167,20 @@ defmodule Seven.Otters.Aggregate do
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates
-      defp command_internal(
-             command,
-             %{correlation_id: correlation_id, internal_state: internal_state, snapshot: snapshot} = state
-           ) do
-        case handle_command(command, internal_state) do
+      defp command_internal(command, state) do
+        case handle_command(command, state.internal_state) do
           {:managed, events} ->
             events =
               events
-              |> set_request_id(command.request_id)
-              |> set_correlation_id(correlation_id)
+              |> Events.set_request_id(command.request_id)
+              |> Events.set_correlation_id(state.correlation_id)
+              |> Events.set_process_id(command.process_id)
 
-            new_internal_state = apply_events(events, internal_state)
-            trigger(events)
+            new_internal_state = apply_events(events, state.internal_state)
+            Events.trigger(events)
 
             snapshot =
-              snapshot
+              state.snapshot
               |> Snapshot.add_events(events)
               |> Snapshot.snap_if_needed(new_internal_state)
 
@@ -198,19 +196,8 @@ defmodule Seven.Otters.Aggregate do
       defp verify_alive(pid),
         do: Process.send_after(pid, :verify_alive, @lifetime_minutes_check * 60_000)
 
-      @spec set_request_id(List.t(), String.t()) :: List.t()
-      defp set_request_id(events, request_id) when is_list(events),
-        do: Enum.map(events, &Map.put(&1, :request_id, request_id))
-
-      @spec set_correlation_id([Seven.Otters.Event] | Seven.Otters.Event, bitstring) :: [Seven.Otters.Event]
-      defp set_correlation_id(events, correlation_id) when is_list(events) do
-        Enum.map(events, fn e -> set_correlation_id(e, correlation_id) end)
-      end
-
-      defp set_correlation_id(event, correlation_id), do: Map.put(event, :correlation_id, correlation_id)
-
-      @spec create_event(String.t(), Map.t()) :: Map.t()
-      defp create_event(type, payload) when is_map(payload) do
+      @spec create_event(bitstring, map) :: map
+      defp create_event(type, payload) do
         Seven.Otters.Event.create(type, payload, __MODULE__)
       end
 
@@ -221,13 +208,6 @@ defmodule Seven.Otters.Aggregate do
         Seven.Log.event_received(event, __MODULE__)
         new_state = handle_event(event, state)
         apply_events(events, new_state)
-      end
-
-      defp trigger([]), do: :ok
-
-      defp trigger([event | events]) do
-        Seven.EventStore.EventStore.fire(event)
-        trigger(events)
       end
 
       defp after_command({:no_aggregate, msg}) do
