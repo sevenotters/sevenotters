@@ -44,16 +44,23 @@ defmodule Seven.Otters.Process do
       def handle_call({:command, command}, _from, state) do
         Seven.Log.debug("#{__MODULE__} received command: #{inspect(command)}")
 
-        {next_operation, events, new_internal_state} = handle_command(command, state.process_id, state.internal_state)
-        state = %{state | internal_state: new_internal_state}
-        trigger_events(events, command.request_id, state.process_id)
-
-        case next_operation do
-          :continue ->
+        case handle_command(command, state.process_id, state.internal_state) do
+          {:continue, events, new_internal_state} ->
+            state = %{state | internal_state: new_internal_state}
+            trigger_events(events, command.request_id, state.process_id)
             {:reply, :managed, state}
-          :stop ->
+
+          {:stop, events, new_internal_state} ->
+            state = %{state | internal_state: new_internal_state}
+            trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, :stop, state}
+
+          {:error, reason, events, new_internal_state} ->
+            state = %{state | internal_state: new_internal_state}
+            trigger_events(events, command.request_id, state.process_id)
+            unsubscribe_from_es(self())
+            {:stop, :normal, {:error, reason}, state}
         end
       end
 
