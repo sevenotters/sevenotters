@@ -4,6 +4,7 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback initialize() :: any
   @callback insert_event(map) :: any
   @callback upsert_snapshot(bitstring, map) :: any
+  @callback upsert_process(bitstring, map) :: any
   @callback new_id :: any
   @callback new_printable_id :: bitstring
   @callback object_id(bitstring) :: any
@@ -12,6 +13,7 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback max_counter_in_events() :: integer
   @callback drop_events() :: any
   @callback drop_snapshots() :: any
+  @callback drop_processes() :: any
 
   @callback event_by_id(bitstring) :: map
   @callback events_by_correlation_id(bitstring, integer) :: [map]
@@ -19,4 +21,6 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback events() :: [map]
   @callback snapshots() :: [map]
   @callback get_snapshot(bitstring) :: map | nil
+  @callback processes() :: [map]
+  @callback get_process(bitstring) :: map | nil
 end

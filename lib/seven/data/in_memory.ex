@@ -7,7 +7,7 @@ defmodule Seven.Data.InMemory do
 
   @id_regex ~r/^[A-Fa-f0-9\-]{24}$/
 
-  defstruct events: [], snapshots: []
+  defstruct events: [], snapshots: [], processes: []
 
   def start_link(opts \\ []) do
     Log.info("Persistence is InMemory")
@@ -29,9 +29,19 @@ defmodule Seven.Data.InMemory do
     GenServer.cast(__MODULE__, {:upsert_snapshot, [correlation_id, value]})
   end
 
+  @spec upsert_process(bitstring, map) :: any
+  def upsert_process(process_id, value) do
+    GenServer.cast(__MODULE__, {:upsert_process, [process_id, value]})
+  end
+
   @spec get_snapshot(bitstring) :: map | nil
   def get_snapshot(correlation_id) do
     GenServer.call(__MODULE__, {:get_snapshot, correlation_id})
+  end
+
+  @spec get_process(bitstring) :: map | nil
+  def get_process(process_id) do
+    GenServer.call(__MODULE__, {:get_process, process_id})
   end
 
   @spec new_id :: any
@@ -73,11 +83,17 @@ defmodule Seven.Data.InMemory do
   @spec snapshots() :: [map]
   def snapshots(), do: GenServer.call(__MODULE__, :snapshots)
 
+  @spec processes() :: [map]
+  def processes(), do: GenServer.call(__MODULE__, :processes)
+
   @spec drop_events() :: any
   def drop_events(), do: GenServer.call(__MODULE__, :drop_events)
 
   @spec drop_snapshots() :: any
   def drop_snapshots(), do: GenServer.call(__MODULE__, :drop_snapshots)
+
+  @spec drop_processes() :: any
+  def drop_processes(), do: GenServer.call(__MODULE__, :drop_processes)
 
   #
   # Callbacks
@@ -85,6 +101,11 @@ defmodule Seven.Data.InMemory do
   def handle_call({:get_snapshot, correlation_id}, _from, %{snapshots: snapshots} = state) do
     snap = snapshots |> Enum.find(fn s -> s.correlation_id == correlation_id end)
     {:reply, snap, state}
+  end
+
+  def handle_call({:get_process, process_id}, _from, %{processes: processes} = state) do
+    process = processes |> Enum.find(fn p -> p.process_id == process_id end)
+    {:reply, process, state}
   end
 
   def handle_call(:max_counter_in_events, _from, %{events: events} = state) do
@@ -120,9 +141,13 @@ defmodule Seven.Data.InMemory do
 
   def handle_call(:snapshots, _from, %{snapshots: snapshots} = state), do: {:reply, snapshots, state}
 
+  def handle_call(:processes, _from, %{processes: processes} = state), do: {:reply, processes, state}
+
   def handle_call(:drop_events, _from, state), do: {:reply, nil, %{state | events: []}}
 
   def handle_call(:drop_snapshots, _from, state), do: {:reply, nil, %{state | snapshots: []}}
+
+  def handle_call(:drop_processes, _from, state), do: {:reply, nil, %{state | processes: []}}
 
   defp filter_after_counter(events, -1), do: events
 
@@ -142,5 +167,15 @@ defmodule Seven.Data.InMemory do
       end
 
     {:noreply, %{state | snapshots: snapshots}}
+  end
+
+  def handle_cast({:upsert_process, [process_id, value]}, %{processes: processes} = state) do
+    processes =
+      case Enum.find_index(processes, fn p -> p.process_id == process_id end) do
+        nil -> processes ++ [value]
+        index -> put_in(processes, [Access.at(index)], value)
+      end
+
+    {:noreply, %{state | processes: processes}}
   end
 end

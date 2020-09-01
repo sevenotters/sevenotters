@@ -86,7 +86,7 @@ defmodule Seven.CommandBus do
       {:ok, persistence_correlation_value_id} ->
         correlation_value_id = Seven.Data.Persistence.printable_id(persistence_correlation_value_id)
 
-        {:ok, pid} = Seven.Registry.get_child(request_info.handler, correlation_value_id)
+        {:ok, pid} = Seven.Registry.get_aggregate(request_info.handler, correlation_value_id)
         Seven.Log.command_received(request_info.command)
 
         request_info = put_in(request_info, [:command, :process_id], request_info.command_request.process_id)
@@ -106,7 +106,7 @@ defmodule Seven.CommandBus do
       {:ok, persistence_correlation_value_id} ->
         correlation_value_id = Seven.Data.Persistence.printable_id(persistence_correlation_value_id)
 
-        {:ok, pid} = Seven.Registry.get_child(request_info.handler, correlation_value_id)
+        {:ok, pid} = Seven.Registry.get_process(request_info.handler, correlation_value_id)
         Seven.Log.command_received(request_info.command)
 
         request_info = put_in(request_info, [:command, :process_id], correlation_value_id)

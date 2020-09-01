@@ -8,17 +8,14 @@ defmodule Seven.Otters.Process do
       use Seven.Utils.Tagger
       @tag :process
 
+      alias Seven.Data.Persistence
       alias Seven.Utils.Events
 
       # API
       def process_field, do: unquote(process_field)
 
       def start_link(process_id, opts \\ []) do
-        {:ok, pid} = GenServer.start_link(__MODULE__, process_id, opts)
-
-        subscribe_to_es(pid)
-
-        {:ok, pid}
+        GenServer.start_link(__MODULE__, process_id, opts)
       end
 
       @spec command(pid, map) :: any
@@ -30,13 +27,15 @@ defmodule Seven.Otters.Process do
       # Callbacks
       def init(process_id) do
         Seven.Log.debug("Init (#{inspect(self())}): #{inspect(process_id)}")
+        subscribe_to_es(self())
+        {:ok, load_initial_state(process_id)}
+      end
 
-        state = %{
-          process_id: process_id,
-          internal_state: init_state()
-        }
-
-        {:ok, state}
+      defp load_initial_state(process_id) do
+        case Seven.Data.Persistence.get_process(process_id) do
+          nil -> %{process_id: process_id, internal_state: init_state()}
+          initial_state -> initial_state
+        end
       end
 
       def handle_call(:state, _from, state), do: {:reply, state, state}
@@ -47,17 +46,20 @@ defmodule Seven.Otters.Process do
         case handle_command(command, state.process_id, state.internal_state) do
           {:continue, events, new_internal_state} ->
             state = %{state | internal_state: new_internal_state}
+            persist(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             {:reply, :managed, state}
 
           {:stop, events, new_internal_state} ->
             state = %{state | internal_state: new_internal_state}
+            persist(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, :stop, state}
 
           {:error, reason, events, new_internal_state} ->
             state = %{state | internal_state: new_internal_state}
+            persist(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, {:error, reason}, state}
@@ -83,11 +85,13 @@ defmodule Seven.Otters.Process do
 
         {next_operation, events, new_internal_state} = handle_event(event, internal_state)
         state = %{state | internal_state: new_internal_state}
+        persist(state.process_id, state)
         trigger_events(events, event.request_id, state.process_id)
 
         case next_operation do
           :continue ->
             {:noreply, state}
+
           :stop ->
             unsubscribe_from_es(self())
             {:stop, :normal, state}
@@ -97,6 +101,7 @@ defmodule Seven.Otters.Process do
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates
+      defp persist(id, state), do: Persistence.upsert_process(id, state)
 
       defp subscribe_to_es(pid) do
         unquote(listener_of_events)

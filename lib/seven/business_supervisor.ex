@@ -12,14 +12,20 @@ defmodule Seven.BusinessSupervisor do
   def init(:ok) do
     registry = [supervisor(Registry, [:unique, :registry])]
 
-    opts = [strategy: :one_for_one]
+    process_supervisor = [
+      %{
+        id: Seven.ProcessSupervisor,
+        start: {Seven.ProcessSupervisor, :start_link, [[]]}
+      }
+    ]
+
     policies = Seven.Entities.policies() |> additional_workers()
     services = Seven.Entities.services() |> additional_workers()
     projections = Seven.Entities.projections() |> Map.values() |> additional_workers()
 
     Supervisor.init(
-      policies ++ services ++ registry ++ projections,
-      opts
+      policies ++ services ++ registry ++ projections ++ process_supervisor,
+      strategy: :one_for_one
     )
   end
 

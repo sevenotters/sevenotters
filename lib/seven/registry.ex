@@ -1,12 +1,23 @@
 defmodule Seven.Registry do
   @moduledoc false
 
-  @spec get_child(atom, bitstring) :: {:ok, pid}
-  def get_child(handler, correlation_value_id) do
+  @spec get_aggregate(atom, bitstring) :: {:ok, pid}
+  def get_aggregate(handler, correlation_value_id) do
     {key, name} = get_key(handler, correlation_value_id)
 
     case Registry.lookup(:registry, key) do
       [] -> handler.start_link(key, name: name)
+      [{pid, _key}] -> {:ok, pid}
+      _ -> raise("More values in registry for key #{key}")
+    end
+  end
+
+  @spec get_process(atom, bitstring) :: {:ok, pid}
+  def get_process(handler, correlation_value_id) do
+    {key, name} = get_key(handler, correlation_value_id)
+
+    case Registry.lookup(:registry, key) do
+      [] -> Seven.ProcessSupervisor.start_process(handler, key, name: name)
       [{pid, _key}] -> {:ok, pid}
       _ -> raise("More values in registry for key #{key}")
     end

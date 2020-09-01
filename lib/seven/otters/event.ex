@@ -13,7 +13,7 @@ defmodule Seven.Otters.Event do
             date: nil,
             payload: %{}
 
-  @spec create(String.t(), Map.t(), atom) :: Map.t()
+  @spec create(bitstring, map, atom) :: t
   def create(type, payload, correlation_module) do
     struct(
       %__MODULE__{},

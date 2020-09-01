@@ -16,9 +16,13 @@ defmodule Seven.Data.Persistence do
   def insert_event(%{__struct__: _} = value),
     do: persistence().insert_event(value |> Map.from_struct())
 
-  @spec upsert_snapshot(map, map) :: any
+  @spec upsert_snapshot(bitstring, map) :: any
   def upsert_snapshot(correlation_id, %{__struct__: _} = value),
     do: persistence().upsert_snapshot(correlation_id, value |> Map.from_struct())
+
+  @spec upsert_process(bitstring, map) :: any
+  def upsert_process(process_id, %{} = value),
+    do: persistence().upsert_process(process_id, value)
 
   @spec new_id :: map
   def new_id, do: persistence().new_id()
@@ -54,6 +58,12 @@ defmodule Seven.Data.Persistence do
   @spec snapshots() :: [map]
   def snapshots(), do: persistence().snapshots()
 
+  @spec processes() :: [map]
+  def processes(), do: persistence().processes()
+
+  @spec get_process(bitstring) :: map | nil
+  def get_process(correlation_id), do: persistence().get_process(correlation_id)
+
   @spec get_snapshot(bitstring) :: map | nil
   def get_snapshot(correlation_id), do: persistence().get_snapshot(correlation_id)
 
@@ -62,6 +72,9 @@ defmodule Seven.Data.Persistence do
 
   @spec drop_snapshots() :: any
   def drop_snapshots(), do: persistence().drop_snapshots()
+
+  @spec drop_processes() :: any
+  def drop_processes(), do: persistence().drop_processes()
 
   @spec is_valid_id?(any) :: boolean
   def is_valid_id?(id), do: persistence().is_valid_id?(id)
