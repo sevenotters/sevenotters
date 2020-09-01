@@ -8,6 +8,7 @@ defmodule Seven.Test.Helper do
 
   def drop_events, do: Seven.Data.Persistence.drop_events()
   def drop_snapshots, do: Seven.Data.Persistence.drop_snapshots()
+  def drop_processes, do: Seven.Data.Persistence.drop_processes()
 
   def clean_projections do
     # Projections can be already loaded before cleaning events, clean it

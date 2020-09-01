@@ -31,13 +31,6 @@ defmodule Seven.Otters.Process do
         {:ok, load_initial_state(process_id)}
       end
 
-      defp load_initial_state(process_id) do
-        case Seven.Data.Persistence.get_process(process_id) do
-          nil -> %{process_id: process_id, internal_state: init_state()}
-          initial_state -> initial_state
-        end
-      end
-
       def handle_call(:state, _from, state), do: {:reply, state, state}
 
       def handle_call({:command, command}, _from, state) do
@@ -46,20 +39,20 @@ defmodule Seven.Otters.Process do
         case handle_command(command, state.process_id, state.internal_state) do
           {:continue, events, new_internal_state} ->
             state = %{state | internal_state: new_internal_state}
-            persist(state.process_id, state)
+            write_persistence(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             {:reply, :managed, state}
 
           {:stop, events, new_internal_state} ->
             state = %{state | internal_state: new_internal_state}
-            persist(state.process_id, state)
+            write_persistence(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, :stop, state}
 
           {:error, reason, events, new_internal_state} ->
             state = %{state | internal_state: new_internal_state}
-            persist(state.process_id, state)
+            write_persistence(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, {:error, reason}, state}
@@ -85,7 +78,7 @@ defmodule Seven.Otters.Process do
 
         {next_operation, events, new_internal_state} = handle_event(event, internal_state)
         state = %{state | internal_state: new_internal_state}
-        persist(state.process_id, state)
+        write_persistence(state.process_id, state)
         trigger_events(events, event.request_id, state.process_id)
 
         case next_operation do
@@ -101,7 +94,24 @@ defmodule Seven.Otters.Process do
       def handle_info(_, state), do: {:noreply, state}
 
       # Privates
-      defp persist(id, state), do: Persistence.upsert_process(id, state)
+      defp write_persistence(id, state) do
+        state = %{state | internal_state: :erlang.term_to_binary(state.internal_state)}
+        Persistence.upsert_process(id, state)
+      end
+
+      defp load_initial_state(process_id) do
+        case read_persistence(process_id) do
+          nil -> %{process_id: process_id, internal_state: init_state()}
+          state -> state
+        end
+      end
+
+      defp read_persistence(id) do
+        case Seven.Data.Persistence.get_process(id) do
+          nil -> nil
+          state -> %{state | internal_state: :erlang.binary_to_term(state.internal_state)}
+        end
+      end
 
       defp subscribe_to_es(pid) do
         unquote(listener_of_events)
