@@ -44,6 +44,9 @@ defmodule Seven.Otters.Aggregate do
 
       alias Seven.Utils.{Events, Snapshot}
 
+      def command_timeout, do: 5_000
+      defoverridable command_timeout: 0
+
       # API
       def aggregate_field, do: unquote(aggregate_field)
 
@@ -60,7 +63,7 @@ defmodule Seven.Otters.Aggregate do
       @spec command(pid, map) :: any
       def command(pid, command) do
         try do
-          GenServer.call(pid, {:command, command})
+          GenServer.call(pid, {:command, command}, command_timeout())
         catch
           :exit, {:noproc, _} ->
             Seven.Log.error("""

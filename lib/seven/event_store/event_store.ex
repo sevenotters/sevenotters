@@ -15,13 +15,13 @@ defmodule Seven.EventStore.EventStore do
   @spec subscribe(String.t(), pid) :: any
   def subscribe(event_type, subscriber_pid)
       when is_pid(subscriber_pid) and is_bitstring(event_type) do
-    GenServer.call(__MODULE__, {:subscribe, event_type, subscriber_pid})
+    GenServer.cast(__MODULE__, {:subscribe, event_type, subscriber_pid})
   end
 
   @spec unsubscribe(String.t(), pid) :: any
   def unsubscribe(event_type, subscriber_pid)
       when is_pid(subscriber_pid) and is_bitstring(event_type) do
-    GenServer.call(__MODULE__, {:unsubscribe, event_type, subscriber_pid})
+    GenServer.cast(__MODULE__, {:unsubscribe, event_type, subscriber_pid})
   end
 
   @spec fire(Map.t()) :: any
@@ -32,7 +32,7 @@ defmodule Seven.EventStore.EventStore do
 
   @spec events_by_correlation_id(bitstring, integer) :: [map]
   def events_by_correlation_id(correlation_id, after_counter \\ -1) do
-    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter})
+    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter}) #, :infinity - TODO: implement cursor from persistence
   end
 
   @spec event_by_id(bitstring) :: map
@@ -55,16 +55,6 @@ defmodule Seven.EventStore.EventStore do
   def handle_call(:state, _from, state),
     do: {:reply, %{event_store: state, events: Persistence.events()}, state}
 
-  def handle_call({:subscribe, event_type, pid}, _from, state) do
-    new_state = State.subscribe_pid_to_event(state, pid, event_type)
-    {:reply, pid, new_state}
-  end
-
-  def handle_call({:unsubscribe, event_type, pid}, _from, state) do
-    new_state = State.unsubscribe_pid_to_event(state, pid, event_type)
-    {:reply, pid, new_state}
-  end
-
   def handle_call({:events_by_correlation_id, correlation_id, after_counter}, _from, state) do
     events = Persistence.events_by_correlation_id(correlation_id, after_counter) |> to_events
     {:reply, events, state}
@@ -75,6 +65,16 @@ defmodule Seven.EventStore.EventStore do
   def handle_call({:events_by_types, types, after_counter}, _from, state) do
     events = Persistence.events_by_types(types, after_counter) |> to_events
     {:reply, events, state}
+  end
+
+  def handle_cast({:subscribe, event_type, pid}, state) do
+    new_state = State.subscribe_pid_to_event(state, pid, event_type)
+    {:noreply, new_state}
+  end
+
+  def handle_cast({:unsubscribe, event_type, pid}, state) do
+    new_state = State.unsubscribe_pid_to_event(state, pid, event_type)
+    {:noreply, new_state}
   end
 
   def handle_cast({:fire, event}, state) do
