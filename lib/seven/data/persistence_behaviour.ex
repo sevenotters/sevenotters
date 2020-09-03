@@ -23,4 +23,6 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback get_snapshot(bitstring) :: map | nil
   @callback processes() :: [map]
   @callback get_process(bitstring) :: map | nil
+
+  @callback processes_id_by_status(bitstring) :: [map]
 end

@@ -19,12 +19,14 @@ defmodule Seven.BusinessSupervisor do
       }
     ]
 
+    process_starter = [worker(Seven.ProcessStarter, [], restart: :permanent, id: Seven.ProcessStarter)]
+
     policies = Seven.Entities.policies() |> additional_workers()
     services = Seven.Entities.services() |> additional_workers()
     projections = Seven.Entities.projections() |> Map.values() |> additional_workers()
 
     Supervisor.init(
-      policies ++ services ++ registry ++ projections ++ process_supervisor,
+      policies ++ services ++ registry ++ projections ++ process_supervisor ++ process_starter,
       strategy: :one_for_one
     )
   end

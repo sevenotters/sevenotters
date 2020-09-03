@@ -95,9 +95,22 @@ defmodule Seven.Data.InMemory do
   @spec drop_processes() :: any
   def drop_processes(), do: GenServer.call(__MODULE__, :drop_processes)
 
+  @callback processes_id_by_status(bitstring) :: [map]
+  def processes_id_by_status(status) do
+    GenServer.call(__MODULE__, {:processes_id_by_status, status})
+  end
+
   #
   # Callbacks
   #
+  def handle_call({:processes_id_by_status, status}, _from, %{processes: processes} = state) do
+    process =
+      processes
+      |> Enum.filter(fn p -> p.status == status end)
+      |> Enum.map(fn p -> p.process_id end)
+    {:reply, process, state}
+  end
+
   def handle_call({:get_snapshot, correlation_id}, _from, %{snapshots: snapshots} = state) do
     snap = snapshots |> Enum.find(fn s -> s.correlation_id == correlation_id end)
     {:reply, snap, state}

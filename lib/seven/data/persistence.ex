@@ -81,5 +81,9 @@ defmodule Seven.Data.Persistence do
   @spec is_valid_id?(any) :: boolean
   def is_valid_id?(id), do: persistence().is_valid_id?(id)
 
+  @callback processes_id_by_status(bitstring) :: [map]
+  def processes_id_by_status(status),
+    do: persistence().processes_id_by_status(status)
+
   defp persistence, do: Application.get_env(:seven, :persistence) || Seven.Data.InMemory
 end
