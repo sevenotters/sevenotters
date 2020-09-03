@@ -11,6 +11,10 @@ defmodule Seven.Otters.Process do
       alias Seven.Data.Persistence
       alias Seven.Utils.Events
 
+      @process_status_started "started"
+      @process_status_closed "closed"
+      @process_status_closed_with_error "closed_with_error"
+
       # API
       def process_field, do: unquote(process_field)
 
@@ -44,14 +48,14 @@ defmodule Seven.Otters.Process do
             {:reply, :managed, state}
 
           {:stop, events, new_internal_state} ->
-            state = %{state | internal_state: new_internal_state}
+            state = %{state | internal_state: new_internal_state, status: @process_status_closed}
             write_persistence(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, :stop, state}
 
           {:error, reason, events, new_internal_state} ->
-            state = %{state | internal_state: new_internal_state}
+            state = %{state | internal_state: new_internal_state, status: @process_status_closed_with_error}
             write_persistence(state.process_id, state)
             trigger_events(events, command.request_id, state.process_id)
             unsubscribe_from_es(self())
@@ -77,15 +81,25 @@ defmodule Seven.Otters.Process do
         Seven.Log.event_received(event, __MODULE__)
 
         {next_operation, events, new_internal_state} = handle_event(event, internal_state)
-        state = %{state | internal_state: new_internal_state}
-        write_persistence(state.process_id, state)
-        trigger_events(events, event.request_id, state.process_id)
 
         case next_operation do
           :continue ->
+            state = %{state | internal_state: new_internal_state}
+            write_persistence(state.process_id, state)
+            trigger_events(events, event.request_id, state.process_id)
             {:noreply, state}
 
           :stop ->
+            state = %{state | internal_state: new_internal_state, status: @process_status_closed}
+            write_persistence(state.process_id, state)
+            trigger_events(events, event.request_id, state.process_id)
+            unsubscribe_from_es(self())
+            {:stop, :normal, state}
+
+          :error ->
+            state = %{state | internal_state: new_internal_state, status: @process_status_closed_with_error}
+            write_persistence(state.process_id, state)
+            trigger_events(events, event.request_id, state.process_id)
             unsubscribe_from_es(self())
             {:stop, :normal, state}
         end
@@ -101,7 +115,7 @@ defmodule Seven.Otters.Process do
 
       defp load_initial_state(process_id) do
         case read_persistence(process_id) do
-          nil -> %{process_id: process_id, internal_state: init_state()}
+          nil -> %{process_id: process_id, status: @process_status_started, internal_state: init_state()}
           state -> state
         end
       end
