@@ -121,6 +121,8 @@ defmodule Seven.CommandBus do
 
   defp dispatch_command(%RequestInfo{managed: :routed, handler_type: :service} = request_info) do
     Seven.Log.command_received(request_info.command)
+
+    request_info = put_in(request_info, [:command, :process_id], request_info.command_request.process_id)
     request_info.handler.command(request_info.command)
   end
 end

@@ -36,6 +36,7 @@ defmodule Seven.Otters.Service do
           {:managed, events} ->
             events
             |> Events.set_request_id(command.request_id)
+            |> Events.set_process_id(command.process_id)
             |> Events.trigger()
 
             {:reply, :managed, state}
