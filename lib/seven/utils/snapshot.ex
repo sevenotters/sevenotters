@@ -43,7 +43,7 @@ defmodule Seven.Utils.Snapshot do
 
     snap =
       new(snapshot)
-      |> Map.put(:created_at, NaiveDateTime.utc_now() |> NaiveDateTime.to_iso8601())
+      |> Map.put(:created_at, DateTime.utc_now() |> DateTime.to_iso8601())
       |> Map.put(:state, state |> :erlang.term_to_binary())
 
     Persistence.upsert_snapshot(snap.correlation_id, snap)
