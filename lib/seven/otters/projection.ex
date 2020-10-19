@@ -20,9 +20,13 @@ defmodule Seven.Otters.Projection do
       @spec filter((any -> any), atom) :: List.t()
       def filter(map_func, process_name \\ __MODULE__), do: GenServer.call(process_name, {:filter, map_func})
 
-      @spec query(Atom.t(), Map.t(), atom) :: List.t()
-      def query(query_filter, params, process_name \\ __MODULE__),
-        do: GenServer.call(process_name, {:query, query_filter, params})
+      @spec query(Atom.t(), Map.t(), Keyword.t()) :: List.t()
+      def query(query_filter, params, opts \\ []) do
+        projection_name = Keyword.get(opts, :name, __MODULE__)
+        timeout = Keyword.get(opts, :timeout, 5_000)
+
+        GenServer.call(projection_name, {:query, query_filter, params}, timeout)
+      end
 
       @spec state(atom) :: List.t()
       def state(process_name \\ __MODULE__), do: GenServer.call(process_name, :state)
