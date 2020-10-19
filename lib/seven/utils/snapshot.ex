@@ -27,18 +27,18 @@ defmodule Seven.Utils.Snapshot do
     %{snapshot | events_to_snapshot: snapshot.events_to_snapshot + length(events), last_event_id: List.last(events).id}
   end
 
-  def get_snap(correlation_id), do: Persistence.get_snapshot(correlation_id)
+  def get_snap(correlation_id, read_fun), do: read_fun.(correlation_id)
 
   def get_state(binary_state), do: :erlang.binary_to_term(binary_state)
 
-  def snap_if_needed(%__MODULE__{} = snapshot, state) do
+  def snap_if_needed(%__MODULE__{} = snapshot, state, write_func) do
     need = snapshot.events_to_snapshot >= @events_for_snapshot
-    snap_now(need, snapshot, state)
+    snap_now(need, snapshot, write_func, state)
   end
 
-  defp snap_now(false, snapshot, _state), do: snapshot
+  defp snap_now(false, snapshot, _write_func, _state), do: snapshot
 
-  defp snap_now(_, snapshot, state) do
+  defp snap_now(_, snapshot, write_func, state) do
     snapshot = Map.put(snapshot, :events_to_snapshot, 0)
 
     snap =
@@ -46,7 +46,7 @@ defmodule Seven.Utils.Snapshot do
       |> Map.put(:created_at, DateTime.utc_now() |> DateTime.to_iso8601())
       |> Map.put(:state, state |> :erlang.term_to_binary())
 
-    Persistence.upsert_snapshot(snap.correlation_id, snap)
+    write_func.(snap.correlation_id, snap)
 
     snapshot
   end

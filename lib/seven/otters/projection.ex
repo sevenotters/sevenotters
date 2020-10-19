@@ -109,7 +109,7 @@ defmodule Seven.Otters.Projection do
         snapshot =
           snapshot
           |> Snapshot.add_events([event])
-          |> Snapshot.snap_if_needed(new_internal_state)
+          |> Snapshot.snap_if_needed(new_internal_state, &write_snapshot/2)
 
         {:noreply, %{state | internal_state: new_internal_state, snapshot: snapshot}}
       end
@@ -166,7 +166,7 @@ defmodule Seven.Otters.Projection do
       end
 
       defp rehydratate(true) do
-        rehydratate_by_snapshot(Snapshot.get_snap(registered_name()))
+        registered_name() |> Snapshot.get_snap(&read_snapshot/1) |> rehydratate_by_snapshot()
       end
 
       defp rehydratate(_) do
@@ -195,6 +195,9 @@ defmodule Seven.Otters.Projection do
       defp handle_event(event, _state), do: raise("Event #{inspect(event)} is not handled correctly by #{registered_name()}")
       defp pre_handle_query(query, _params, _state), do: raise("Query #{inspect(query)} does not exist in #{registered_name()}: missing pre_handle_query()")
       defp handle_query(query, _params, state), do: raise("Query #{inspect(query)} does not exist in #{registered_name()}: missing handle_query()")
+
+      defp read_snapshot(correlation_id), do: nil
+      defp write_snapshot(correlation_id, snapshot), do: nil
     end
   end
 end
