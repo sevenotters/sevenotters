@@ -1,6 +1,4 @@
 defmodule Seven.Utils.Snapshot do
-  alias Seven.Data.Persistence
-
   @events_for_snapshot 100
 
   defstruct correlation_id: nil,

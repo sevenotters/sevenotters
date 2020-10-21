@@ -9,7 +9,8 @@ defmodule Seven.Sync.ApiRequest do
             wait_for_events: [],
             events: [],
             response: nil,
-            query: nil
+            query: nil,
+            timeout: 5_000
 
   defdelegate fetch(term, key), to: Map
   defdelegate get(term, key, default), to: Map

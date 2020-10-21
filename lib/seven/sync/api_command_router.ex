@@ -55,7 +55,8 @@ defmodule Seven.Sync.ApiCommandRouter do
           command: unquote(post).command,
           state: :unmanaged,
           params: params,
-          wait_for_events: unquote(post)[:wait_for_events] || []
+          wait_for_events: unquote(post)[:wait_for_events] || [],
+          timeout: unquote(post)[:timeout] || 5_000
         }
         |> internal_pre_command
         |> subscribe_to_event_store
@@ -117,8 +118,8 @@ defmodule Seven.Sync.ApiCommandRouter do
 
       defp wait_events(%ApiRequest{state: :managed, wait_for_events: []} = req), do: req
 
-      defp wait_events(%ApiRequest{state: :managed, wait_for_events: events} = req) do
-        incoming_events = wait_for_one_of_events(req.request_id, events, [])
+      defp wait_events(%ApiRequest{state: :managed, wait_for_events: events, timeout: timeout} = req) do
+        incoming_events = wait_for_one_of_events(req.request_id, events, timeout, [])
         %ApiRequest{req | events: incoming_events}
       end
 
@@ -157,23 +158,21 @@ defmodule Seven.Sync.ApiCommandRouter do
 
       defp internal_post_command(%ApiRequest{} = req), do: req
 
-      @command_timeout 5000
+      defp wait_for_one_of_events(_request_id, [], _timeout, incoming_events), do: incoming_events
 
-      defp wait_for_one_of_events(_request_id, [], incoming_events), do: incoming_events
-
-      defp wait_for_one_of_events(request_id, events, incoming_events) do
+      defp wait_for_one_of_events(request_id, events, timeout, incoming_events) do
         receive do
           %Seven.Otters.Event{request_id: ^request_id} = e ->
             if e.type in events do
               incoming_events ++ [e]
             else
-              wait_for_one_of_events(request_id, events, incoming_events)
+              wait_for_one_of_events(request_id, events, timeout, incoming_events)
             end
 
           _ ->
-            wait_for_one_of_events(request_id, events, incoming_events)
+            wait_for_one_of_events(request_id, events, timeout, incoming_events)
         after
-          @command_timeout -> []
+          timeout -> []
         end
       end
     end
