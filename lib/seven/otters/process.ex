@@ -109,7 +109,7 @@ defmodule Seven.Otters.Process do
 
       # Privates
       defp write_persistence(id, state) do
-        state = %{state | internal_state: :erlang.term_to_binary(state.internal_state)}
+        state = %{state | internal_state: state.internal_state |> :erlang.term_to_binary() |> :base64.encode()}
         Persistence.upsert_process(id, state)
       end
 
@@ -123,7 +123,7 @@ defmodule Seven.Otters.Process do
       defp read_persistence(id) do
         case Seven.Data.Persistence.get_process(id) do
           nil -> nil
-          state -> %{state | internal_state: :erlang.binary_to_term(state.internal_state)}
+          state -> %{state | internal_state: state.internal_state |> :base64.decode() |> :erlang.binary_to_term()}
         end
       end
 

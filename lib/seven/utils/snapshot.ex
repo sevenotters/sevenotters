@@ -27,7 +27,7 @@ defmodule Seven.Utils.Snapshot do
 
   def get_snap(correlation_id, read_fun), do: read_fun.(correlation_id)
 
-  def get_state(binary_state), do: :erlang.binary_to_term(binary_state)
+  def get_state(binary_state), do: binary_state |> :base64.decode() |> :erlang.binary_to_term()
 
   def snap_if_needed(%__MODULE__{} = snapshot, state, write_func) do
     need = snapshot.events_to_snapshot >= @events_for_snapshot
@@ -42,7 +42,7 @@ defmodule Seven.Utils.Snapshot do
     snap =
       new(snapshot)
       |> Map.put(:created_at, DateTime.utc_now() |> DateTime.to_iso8601())
-      |> Map.put(:state, state |> :erlang.term_to_binary())
+      |> Map.put(:state, state |> :erlang.term_to_binary() |> :base64.encode())
 
     write_func.(snap.correlation_id, snap)
 

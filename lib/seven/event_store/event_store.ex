@@ -25,7 +25,7 @@ defmodule Seven.EventStore.EventStore do
   end
 
   @spec fire(Map.t()) :: any
-  def fire(event), do: GenServer.cast(__MODULE__, {:fire, event})
+  def fire(event), do: GenServer.call(__MODULE__, {:fire, event})
 
   @spec state() :: any
   def state(), do: GenServer.call(__MODULE__, :state)
@@ -67,6 +67,16 @@ defmodule Seven.EventStore.EventStore do
     {:reply, events, state}
   end
 
+  def handle_call({:fire, event}, _from, state) do
+    event = Map.put(event, :counter, State.next_counter(state))
+    persist(event)
+
+    Seven.Log.event_fired(event)
+    fire(event, State.pids_by_event(state, event.type))
+
+    {:reply, event, State.increment_counter(state)}
+  end
+
   def handle_cast({:subscribe, event_type, pid}, state) do
     new_state = State.subscribe_pid_to_event(state, pid, event_type)
     {:noreply, new_state}
@@ -75,16 +85,6 @@ defmodule Seven.EventStore.EventStore do
   def handle_cast({:unsubscribe, event_type, pid}, state) do
     new_state = State.unsubscribe_pid_to_event(state, pid, event_type)
     {:noreply, new_state}
-  end
-
-  def handle_cast({:fire, event}, state) do
-    event = Map.put(event, :counter, State.next_counter(state))
-    persist(event)
-
-    Seven.Log.event_fired(event)
-    fire(event, State.pids_by_event(state, event.type))
-
-    {:noreply, State.increment_counter(state)}
   end
 
   def handle_info({:DOWN, ref, :process, pid, reason}, state) do
