@@ -50,7 +50,7 @@ defmodule Seven.Data.Persistence do
   def event_by_id(id),
     do: persistence().event_by_id(id)
 
-  @spec events_by_types([bitstring], integer) :: [map]
+  @spec events_by_types([bitstring], integer) :: any
   def events_by_types(types, after_counter),
     do: persistence().events_by_types(types, after_counter)
 
@@ -82,8 +82,10 @@ defmodule Seven.Data.Persistence do
   def is_valid_id?(id), do: persistence().is_valid_id?(id)
 
   @callback processes_id_by_status(bitstring) :: [map]
-  def processes_id_by_status(status),
-    do: persistence().processes_id_by_status(status)
+  def processes_id_by_status(status), do: persistence().processes_id_by_status(status)
+
+  @callback stream_to_list(any) :: [map]
+  def stream_to_list(stream), do: persistence().stream_to_list(stream)
 
   defp persistence, do: Application.get_env(:seven, :persistence) || Seven.Data.InMemory
 end

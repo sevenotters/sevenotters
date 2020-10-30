@@ -32,14 +32,20 @@ defmodule Seven.EventStore.EventStore do
 
   @spec events_by_correlation_id(bitstring, integer) :: [map]
   def events_by_correlation_id(correlation_id, after_counter \\ -1) do
-    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter}) #, :infinity - TODO: implement cursor from persistence
+    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter}) #, :infinity
   end
 
   @spec event_by_id(bitstring) :: map
   def event_by_id(id), do: GenServer.call(__MODULE__, {:event_by_id, id})
 
-  @spec events_by_types([bitstring], integer) :: [map]
+  @spec events_by_types([bitstring], integer) :: any
   def events_by_types(types, after_counter \\ -1), do: GenServer.call(__MODULE__, {:events_by_types, types, after_counter})
+
+  def events_stream_to_list(stream) do
+    stream
+    |> Seven.Data.Persistence.stream_to_list()
+    |> to_events()
+  end
 
   # Callbacks
   def init(:ok) do
@@ -56,15 +62,15 @@ defmodule Seven.EventStore.EventStore do
     do: {:reply, %{event_store: state, events: Persistence.events()}, state}
 
   def handle_call({:events_by_correlation_id, correlation_id, after_counter}, _from, state) do
-    events = Persistence.events_by_correlation_id(correlation_id, after_counter) |> to_events
-    {:reply, events, state}
+    events_stream = Persistence.events_by_correlation_id(correlation_id, after_counter)
+    {:reply, events_stream, state}
   end
 
   def handle_call({:event_by_id, id}, _from, state), do: {:reply, Persistence.event_by_id(id), state}
 
   def handle_call({:events_by_types, types, after_counter}, _from, state) do
-    events = Persistence.events_by_types(types, after_counter) |> to_events
-    {:reply, events, state}
+    events_stream = Persistence.events_by_types(types, after_counter)
+    {:reply, events_stream, state}
   end
 
   def handle_call({:fire, event}, _from, state) do

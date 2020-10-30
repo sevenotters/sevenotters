@@ -132,6 +132,7 @@ defmodule Seven.Otters.Projection do
         events =
           unquote(listener_of_events)
           |> Seven.EventStore.EventStore.events_by_types()
+          |> Seven.EventStore.EventStore.events_stream_to_list()
 
         Seven.Log.info("Processing #{length(events)} events for #{registered_name()}.")
         state = apply_events(events, init_state())
@@ -152,6 +153,7 @@ defmodule Seven.Otters.Projection do
         new_events =
           unquote(listener_of_events)
           |> Seven.EventStore.EventStore.events_by_types(last_seen_event.counter)
+          |> Seven.EventStore.EventStore.events_stream_to_list()
 
         Seven.Log.info("Processing #{length(new_events)} events for #{registered_name()}.")
         state = apply_events(new_events, Snapshot.get_state(snapshot.state))

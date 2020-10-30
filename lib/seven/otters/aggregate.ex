@@ -222,7 +222,10 @@ defmodule Seven.Otters.Aggregate do
       defp after_command(err), do: err
 
       defp rehydrate(correlation_id, nil) do
-        events = Seven.EventStore.EventStore.events_by_correlation_id(correlation_id)
+        events =
+          correlation_id
+          |> Seven.EventStore.EventStore.events_by_correlation_id()
+          |> Seven.EventStore.EventStore.events_stream_to_list()
 
         Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
         state = apply_events(events, init_state())
@@ -239,7 +242,10 @@ defmodule Seven.Otters.Aggregate do
       defp rehydrate(correlation_id, snapshot) do
         snapshot = struct(Snapshot, snapshot)
         last_seen_event = Seven.EventStore.EventStore.event_by_id(snapshot.last_event_id)
-        new_events = Seven.EventStore.EventStore.events_by_correlation_id(correlation_id, last_seen_event.counter)
+        new_events =
+          correlation_id
+          |> Seven.EventStore.EventStore.events_by_correlation_id(last_seen_event.counter)
+          |> Seven.EventStore.EventStore.events_stream_to_list()
 
         Seven.Log.info("Processing #{length(new_events)} events for #{inspect(correlation_id)}.")
         state = apply_events(new_events, Snapshot.get_state(snapshot.state))

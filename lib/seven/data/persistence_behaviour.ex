@@ -15,9 +15,11 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback drop_snapshots() :: any
   @callback drop_processes() :: any
 
+  @callback stream_to_list(any) :: [map]
+
   @callback event_by_id(bitstring) :: map
   @callback events_by_correlation_id(bitstring, integer) :: [map]
-  @callback events_by_types([bitstring], integer) :: [map]
+  @callback events_by_types([bitstring], integer) :: any
   @callback events() :: [map]
   @callback snapshots() :: [map]
   @callback get_snapshot(bitstring) :: map | nil

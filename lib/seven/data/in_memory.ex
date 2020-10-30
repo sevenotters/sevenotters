@@ -100,6 +100,9 @@ defmodule Seven.Data.InMemory do
     GenServer.call(__MODULE__, {:processes_id_by_status, status})
   end
 
+  @callback stream_to_list(any) :: [map]
+  def stream_to_list(items), do: items
+
   #
   # Callbacks
   #
