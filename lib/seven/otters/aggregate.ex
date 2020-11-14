@@ -116,7 +116,6 @@ defmodule Seven.Otters.Aggregate do
             command_internal(command, state)
 
           err ->
-            err = after_command(err)
             {:reply, err, state}
         end
       end
@@ -190,7 +189,6 @@ defmodule Seven.Otters.Aggregate do
             {:reply, :managed, %{state | internal_state: new_internal_state, snapshot: snapshot}}
 
           err ->
-            err = after_command(err)
             {:reply, err, state}
         end
       end
@@ -213,13 +211,10 @@ defmodule Seven.Otters.Aggregate do
         apply_events(events, new_state)
       end
 
-      defp after_command({:no_aggregate, msg}) do
+      defp unload_aggregate() do
         Seven.Log.debug("No aggregate to keep: send :useless to #{__MODULE__}")
         Process.send(self(), :useless, [])
-        msg
       end
-
-      defp after_command(err), do: err
 
       defp rehydrate(correlation_id, nil) do
         events =
