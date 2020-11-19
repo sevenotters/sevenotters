@@ -6,6 +6,8 @@ defmodule Seven.EventStore.EventStore do
   alias Seven.Data.Persistence
   alias Seven.EventStore.State
 
+  @timeout 60_000 # or :infinity
+
   # API
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
@@ -32,14 +34,14 @@ defmodule Seven.EventStore.EventStore do
 
   @spec events_by_correlation_id(bitstring, integer) :: [map]
   def events_by_correlation_id(correlation_id, after_counter \\ -1) do
-    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter}) #, :infinity
+    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter}, @timeout)
   end
 
   @spec event_by_id(bitstring) :: map
   def event_by_id(id), do: GenServer.call(__MODULE__, {:event_by_id, id})
 
   @spec events_by_types([bitstring], integer) :: any
-  def events_by_types(types, after_counter \\ -1), do: GenServer.call(__MODULE__, {:events_by_types, types, after_counter})
+  def events_by_types(types, after_counter \\ -1), do: GenServer.call(__MODULE__, {:events_by_types, types, after_counter}, @timeout)
 
   def events_stream_to_list(stream) do
     stream

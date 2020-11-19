@@ -18,7 +18,7 @@ defmodule Seven.ProcessStarter do
   end
 
   defp restart_process(process_id) do
-    Seven.Log.info("Restaring process #{process_id}")
+    Seven.Log.info("Restarting process #{process_id}")
     {:ok, _pid} = Seven.Registry.get_process_by_id(process_id)
   end
 end
