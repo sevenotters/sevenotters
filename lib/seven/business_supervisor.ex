@@ -23,12 +23,15 @@ defmodule Seven.BusinessSupervisor do
 
     policies = Seven.Entities.policies() |> additional_workers()
     services = Seven.Entities.services() |> additional_workers()
-    projections = Seven.Entities.projections() |> Map.values() |> additional_workers()
 
     Supervisor.init(
-      policies ++ services ++ registry ++ projections ++ process_supervisor ++ process_starter,
+      policies ++ services ++ registry ++ process_supervisor ++ process_starter,
       strategy: :one_for_one
     )
+  end
+
+  def projections do
+    Seven.Entities.projections() |> Map.values() |> additional_workers()
   end
 
   # Privates
