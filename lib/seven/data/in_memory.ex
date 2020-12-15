@@ -111,6 +111,7 @@ defmodule Seven.Data.InMemory do
       processes
       |> Enum.filter(fn p -> p.status == status end)
       |> Enum.map(fn p -> p.process_id end)
+
     {:reply, process, state}
   end
 

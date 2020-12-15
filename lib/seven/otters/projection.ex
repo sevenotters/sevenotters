@@ -50,7 +50,7 @@ defmodule Seven.Otters.Projection do
       def init_rehydrate(opts),
         do: {:rehydrate, nil}
 
-      defoverridable [init_rehydrate: 1]
+      defoverridable init_rehydrate: 1
 
       def handle_continue(:rehydrate, opts) do
         Seven.Log.info("Projection #{registered_name()} started.")

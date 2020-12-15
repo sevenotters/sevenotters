@@ -23,6 +23,7 @@ defmodule Seven.Data.Persistence do
   @spec upsert_process(bitstring, map) :: any
   def upsert_process(process_id, %{__struct__: _} = value),
     do: persistence().upsert_process(process_id, value |> Map.from_struct())
+
   def upsert_process(process_id, %{} = value),
     do: persistence().upsert_process(process_id, value)
 
