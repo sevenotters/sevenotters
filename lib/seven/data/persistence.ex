@@ -16,10 +16,6 @@ defmodule Seven.Data.Persistence do
   def insert_event(%{__struct__: _} = value),
     do: persistence().insert_event(value |> Map.from_struct())
 
-  @spec upsert_snapshot(bitstring, map) :: any
-  def upsert_snapshot(correlation_id, %{__struct__: _} = value),
-    do: persistence().upsert_snapshot(correlation_id, value |> Map.from_struct())
-
   @spec upsert_process(bitstring, map) :: any
   def upsert_process(process_id, %{__struct__: _} = value),
     do: persistence().upsert_process(process_id, value |> Map.from_struct())
@@ -58,23 +54,14 @@ defmodule Seven.Data.Persistence do
   @spec events() :: [map]
   def events(), do: persistence().events()
 
-  @spec snapshots() :: [map]
-  def snapshots(), do: persistence().snapshots()
-
   @spec processes() :: [map]
   def processes(), do: persistence().processes()
 
   @spec get_process(bitstring) :: map | nil
   def get_process(correlation_id), do: persistence().get_process(correlation_id)
 
-  @spec get_snapshot(bitstring) :: map | nil
-  def get_snapshot(correlation_id), do: persistence().get_snapshot(correlation_id)
-
   @spec drop_events() :: any
   def drop_events(), do: persistence().drop_events()
-
-  @spec drop_snapshots() :: any
-  def drop_snapshots(), do: persistence().drop_snapshots()
 
   @spec drop_processes() :: any
   def drop_processes(), do: persistence().drop_processes()

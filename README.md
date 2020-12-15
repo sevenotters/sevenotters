@@ -20,7 +20,6 @@ With no order:
 - [x] Command
 - [x] Command bus
 - [x] Aggregate
-    - [X] Snapshot implementation
     - [ ] Unit test documentation
 - [x] Policy
     - [ ] Unit test documentation
