@@ -47,18 +47,27 @@ defmodule Seven.Otters.Projection do
       #
       def init(opts), do: {:ok, opts, {:continue, :rehydrate}}
 
+      def init_rehydrate(opts),
+        do: {:rehydrate, nil}
+
+      defoverridable [init_rehydrate: 1]
+
       def handle_continue(:rehydrate, opts) do
         Seven.Log.info("Projection #{registered_name()} started.")
 
         subscribe = Keyword.get(opts, :subscribe_to_eventstore, true)
         subscribe_to_event_store(subscribe)
-        {state, snapshot} = rehydratate(subscribe)
 
-        {:noreply,
-         %{
-           internal_state: state,
-           snapshot: snapshot
-         }}
+        state =
+          case init_rehydrate(opts) do
+            {:rehydrate, last_event_id} ->
+              rehydratate(subscribe, last_event_id)
+
+            :skip ->
+              init_state()
+          end
+
+        {:noreply, %{internal_state: state}}
       end
 
       def handle_call({:query, query_filter, params}, _from, %{internal_state: internal_state} = state) do
@@ -102,16 +111,10 @@ defmodule Seven.Otters.Projection do
         {:noreply, state}
       end
 
-      def handle_info(%Seven.Otters.Event{} = event, %{internal_state: internal_state, snapshot: snapshot} = state) do
-        Seven.Log.event_received(event, registered_name())
+      def handle_info(%Seven.Otters.Event{} = event, %{internal_state: internal_state} = state) do
         new_internal_state = handle_event(event, internal_state)
 
-        snapshot =
-          snapshot
-          |> Snapshot.add_events([event])
-          |> Snapshot.snap_if_needed(new_internal_state, &write_snapshot/2)
-
-        {:noreply, %{state | internal_state: new_internal_state, snapshot: snapshot}}
+        {:noreply, %{state | internal_state: new_internal_state}}
       end
 
       def handle_info(_, state), do: {:noreply, state}
@@ -128,52 +131,29 @@ defmodule Seven.Otters.Projection do
         apply_events(events, new_state)
       end
 
-      defp rehydratate_by_snapshot(nil) do
+      defp rehydratate(true, last_event_id) do
         events =
-          unquote(listener_of_events)
-          |> Seven.EventStore.EventStore.events_by_types()
-          |> Seven.EventStore.EventStore.events_stream_to_list()
+          if last_event_id == nil do
+            unquote(listener_of_events)
+            |> Seven.EventStore.EventStore.events_by_types()
+          else
+            unquote(listener_of_events)
+            |> Seven.EventStore.EventStore.events_by_types(last_event_id)
+          end
+
+        events = events |> Seven.EventStore.EventStore.events_stream_to_list()
 
         Seven.Log.info("Processing #{length(events)} events for #{registered_name()}.")
         state = apply_events(events, init_state())
 
         Seven.Log.info("Projection #{registered_name()} rehydrated")
 
-        snapshot =
-          Snapshot.new(registered_name())
-          |> Snapshot.add_events(events)
-
-        {state, snapshot}
+        state
       end
 
-      defp rehydratate_by_snapshot(snapshot) do
-        snapshot = struct(Snapshot, snapshot)
-        last_seen_event = Seven.EventStore.EventStore.event_by_id(snapshot.last_event_id)
-
-        new_events =
-          unquote(listener_of_events)
-          |> Seven.EventStore.EventStore.events_by_types(last_seen_event.counter)
-          |> Seven.EventStore.EventStore.events_stream_to_list()
-
-        Seven.Log.info("Processing #{length(new_events)} events for #{registered_name()}.")
-        state = apply_events(new_events, Snapshot.get_state(snapshot.state))
-
-        Seven.Log.info("Projection #{registered_name()} rehydrated")
-
-        snapshot =
-          Snapshot.new(snapshot)
-          |> Snapshot.add_events(new_events)
-
-        {state, snapshot}
-      end
-
-      defp rehydratate(true) do
-        registered_name() |> Snapshot.get_snap(&read_snapshot/1) |> rehydratate_by_snapshot()
-      end
-
-      defp rehydratate(_) do
+      defp rehydratate(_, _) do
         Seven.Log.info("Projection #{registered_name()} is not subscribed to EventStore.")
-        {init_state(), Snapshot.new(registered_name())}
+        init_state()
       end
 
       defp subscribe_to_event_store(true) do
@@ -197,9 +177,6 @@ defmodule Seven.Otters.Projection do
       defp handle_event(event, _state), do: raise("Event #{inspect(event)} is not handled correctly by #{registered_name()}")
       defp pre_handle_query(query, _params, _state), do: raise("Query #{inspect(query)} does not exist in #{registered_name()}: missing pre_handle_query()")
       defp handle_query(query, _params, state), do: raise("Query #{inspect(query)} does not exist in #{registered_name()}: missing handle_query()")
-
-      defp read_snapshot(correlation_id), do: nil
-      defp write_snapshot(correlation_id, snapshot), do: nil
     end
   end
 end

@@ -50,9 +50,9 @@ defmodule Seven.Data.Persistence do
   def event_by_id(id),
     do: persistence().event_by_id(id)
 
-  @spec events_by_types([bitstring], integer) :: any
-  def events_by_types(types, after_counter),
-    do: persistence().events_by_types(types, after_counter)
+  @spec events_by_types([bitstring], String.t()) :: any
+  def events_by_types(types, after_event_id),
+    do: persistence().events_by_types(types, after_event_id)
 
   @spec events() :: [map]
   def events(), do: persistence().events()
