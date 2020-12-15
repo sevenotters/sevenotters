@@ -29,7 +29,6 @@ defmodule Seven.Data.InMemory do
     GenServer.cast(__MODULE__, {:upsert_process, [process_id, value]})
   end
 
-
   @spec get_process(bitstring) :: map | nil
   def get_process(process_id) do
     GenServer.call(__MODULE__, {:get_process, process_id})
