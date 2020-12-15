@@ -7,7 +7,6 @@ defmodule Seven.Otters.Projection do
 
       @test_env Mix.env() == :test
 
-      alias Seven.Utils.Snapshot
       use Seven.Utils.Tagger
       @tag :projection
 
@@ -50,7 +49,7 @@ defmodule Seven.Otters.Projection do
       def init_rehydrate(opts),
         do: {:rehydrate, nil}
 
-      defoverridable [init_rehydrate: 1]
+      defoverridable init_rehydrate: 1
 
       def handle_continue(:rehydrate, opts) do
         Seven.Log.info("Projection #{registered_name()} started.")
@@ -90,7 +89,7 @@ defmodule Seven.Otters.Projection do
       def handle_call(:pid, _from, state), do: {:reply, self(), state}
 
       def handle_call(:clean, _from, state) do
-        {:reply, :ok, %{state | internal_state: init_state(), snapshot: Snapshot.new(registered_name())}}
+        {:reply, :ok, %{state | internal_state: init_state()}}
       end
 
       def handle_call({:send, event}, _from, %{internal_state: internal_state} = state) do

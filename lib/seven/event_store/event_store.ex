@@ -6,7 +6,8 @@ defmodule Seven.EventStore.EventStore do
   alias Seven.Data.Persistence
   alias Seven.EventStore.State
 
-  @timeout 60_000 # or :infinity
+  # or :infinity
+  @timeout 60_000
 
   # API
   @spec start_link(List.t()) :: {:ok, pid}

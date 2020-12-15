@@ -52,20 +52,20 @@ config :logger, :console,
 The first section indicates in which application all entities (aggregates, projections, etc.) are defined.
 
 By default Seven Otters uses in memory (and volatile!) event store: events remain in memory and they are lost ending application.
-To use MongoDB as permanet persistence, add to your configuration:
+To use Postgres as permanet persistence, add to your configuration:
 
 ```elixir
 config :seven,
-  persistence: SevenottersMongo.Storage
+  persistence: SevenottersPostgres.Storage
 ```
 
-add `sevenotters_mongo` to project dependencies:
+add `sevenotters_postgres` to project dependencies:
 
 ```elixir
 defp deps do
 [
   ...
-  {:sevenotters_mongo, "~> 0.1"}
+  {:sevenotters_postgres, "~> 0.1"}
 ]
 end
 ```
