@@ -136,6 +136,9 @@ defmodule Seven.Otters.Projection do
           |> events_by_types(last_event_id)
           |> Seven.EventStore.EventStore.events_stream_to_list()
 
+        # TODO: stream events via Seven.EventStore.EventStore.events_stream()
+        #       don't load in memory the list of events
+
         Seven.Log.info("Processing #{length(events)} events for #{registered_name()}.")
         state = apply_events(events, init_state())
 
