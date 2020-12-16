@@ -132,15 +132,9 @@ defmodule Seven.Otters.Projection do
 
       defp rehydratate(true, last_event_id) do
         events =
-          if last_event_id == nil do
-            unquote(listener_of_events)
-            |> Seven.EventStore.EventStore.events_by_types()
-          else
-            unquote(listener_of_events)
-            |> Seven.EventStore.EventStore.events_by_types(last_event_id)
-          end
-
-        events = events |> Seven.EventStore.EventStore.events_stream_to_list()
+          unquote(listener_of_events)
+          |> events_by_types(last_event_id)
+          |> Seven.EventStore.EventStore.events_stream_to_list()
 
         Seven.Log.info("Processing #{length(events)} events for #{registered_name()}.")
         state = apply_events(events, init_state())
@@ -149,6 +143,9 @@ defmodule Seven.Otters.Projection do
 
         state
       end
+
+      defp events_by_types(types, nil), do: Seven.EventStore.EventStore.events_by_types(types)
+      defp events_by_types(types, last_event_id), do: Seven.EventStore.EventStore.events_by_types(types, last_event_id)
 
       defp rehydratate(_, _) do
         Seven.Log.info("Projection #{registered_name()} is not subscribed to EventStore.")
