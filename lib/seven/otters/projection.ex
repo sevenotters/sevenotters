@@ -44,12 +44,8 @@ defmodule Seven.Otters.Projection do
       #
       # Callbacks
       #
+
       def init(opts), do: {:ok, opts, {:continue, :rehydrate}}
-
-      def init_rehydrate(opts),
-        do: {:rehydrate, nil}
-
-      defoverridable init_rehydrate: 1
 
       def handle_continue(:rehydrate, opts) do
         Seven.Log.info("Projection #{registered_name()} started.")
@@ -121,6 +117,10 @@ defmodule Seven.Otters.Projection do
       #
       # Privates
       #
+
+      defp init_rehydrate(_opts), do: {:rehydrate, nil}
+      defoverridable init_rehydrate: 1
+
       @spec apply_events(List.t(), Map.t()) :: Map.t()
       defp apply_events([], state), do: state
 
