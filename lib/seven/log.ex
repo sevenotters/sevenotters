@@ -63,6 +63,8 @@ defmodule Seven.Log do
     event
   end
 
+  defp filter_data(m) when is_struct(m), do: filter_data(Map.from_struct(m))
+
   defp filter_data(m) when is_map(m) do
     Enum.map(m, fn
       {k, v} when is_map(v) -> filter(k, filter_data(v))
