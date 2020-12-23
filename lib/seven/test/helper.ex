@@ -7,7 +7,6 @@ defmodule Seven.Test.Helper do
   def unique_id, do: UUID.uuid4(:hex) |> String.slice(0, 24)
 
   def drop_events, do: Seven.Data.Persistence.drop_events()
-  def drop_snapshots, do: Seven.Data.Persistence.drop_snapshots()
   def drop_processes, do: Seven.Data.Persistence.drop_processes()
 
   def clean_projections do

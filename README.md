@@ -20,7 +20,6 @@ With no order:
 - [x] Command
 - [x] Command bus
 - [x] Aggregate
-    - [X] Snapshot implementation
     - [ ] Unit test documentation
 - [x] Policy
     - [ ] Unit test documentation
@@ -30,7 +29,6 @@ With no order:
     - [ ] Review
     - [ ] Unit test documentation
 - [x] Projection
-    - [x] Snapshot implementation
     - [ ] Unit test documentation
 - [x] Generic command/query API support (Plug)
     - [ ] To move to different project as helper library
