@@ -15,6 +15,9 @@ defmodule Seven.Otters.Process do
       @process_status_closed "closed"
       @process_status_closed_with_error "closed_with_error"
 
+      def command_timeout, do: 5_000
+      defoverridable command_timeout: 0
+
       # API
       def process_field, do: unquote(process_field)
 
@@ -23,7 +26,7 @@ defmodule Seven.Otters.Process do
       end
 
       @spec command(pid, map) :: any
-      def command(pid, command), do: GenServer.call(pid, {:command, command})
+      def command(pid, command), do: GenServer.call(pid, {:command, command}, command_timeout())
 
       @spec state(pid) :: any
       def state(pid), do: GenServer.call(pid, :state)
