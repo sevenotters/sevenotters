@@ -35,7 +35,8 @@ defmodule Seven.Utils.Events do
 
   def set_correlation_id(event, correlation_id), do: Map.put(event, :correlation_id, correlation_id)
 
-  @spec set_process_id([Seven.Otters.Event] | Seven.Otters.Event, bitstring) :: [Seven.Otters.Event]
+  def set_process_id(events, nil), do: events
+
   def set_process_id(events, process_id) when is_list(events) do
     Enum.map(events, fn e -> set_process_id(e, process_id) end)
   end
