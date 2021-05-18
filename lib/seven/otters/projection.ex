@@ -127,7 +127,7 @@ defmodule Seven.Otters.Projection do
       end
 
       defp rehydratate(true, last_event_id) do
-        IO.puts("Rehydrating #{registered_name()}.")
+        Seven.Log.info("Rehydrating #{registered_name()}.")
 
         state =
           unquote(listener_of_events)
