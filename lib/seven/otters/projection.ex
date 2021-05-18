@@ -121,39 +121,31 @@ defmodule Seven.Otters.Projection do
       defp init_rehydrate(_opts), do: {:rehydrate, nil}
       defoverridable init_rehydrate: 1
 
-      @spec apply_events(List.t(), Map.t()) :: Map.t()
-      defp apply_events([], state), do: state
-
-      defp apply_events([event | events], state) do
+      defp apply_event(event, state) do
         Seven.Log.event_received(event, registered_name())
-        new_state = handle_event(event, state)
-        apply_events(events, new_state)
+        handle_event(event, state)
       end
 
       defp rehydratate(true, last_event_id) do
-        events =
+        IO.puts("Rehydrating #{registered_name()}.")
+
+        state =
           unquote(listener_of_events)
           |> events_by_types(last_event_id)
-          |> Seven.EventStore.EventStore.events_stream_to_list()
+          |> Seven.EventStore.EventStore.events_reduce(init_state(), &apply_event(&1, &2))
 
-        # TODO: stream events via Seven.EventStore.EventStore.events_stream()
-        #       don't load in memory the list of events
-
-        Seven.Log.info("Processing #{length(events)} events for #{registered_name()}.")
-        state = apply_events(events, init_state())
-
-        Seven.Log.info("Projection #{registered_name()} rehydrated")
+        Seven.Log.info("Projection #{registered_name()} rehydrated.")
 
         state
       end
-
-      defp events_by_types(types, nil), do: Seven.EventStore.EventStore.events_by_types(types)
-      defp events_by_types(types, last_event_id), do: Seven.EventStore.EventStore.events_by_types(types, last_event_id)
 
       defp rehydratate(_, _) do
         Seven.Log.info("Projection #{registered_name()} is not subscribed to EventStore.")
         init_state()
       end
+
+      defp events_by_types(types, nil), do: Seven.EventStore.EventStore.events_by_types(types)
+      defp events_by_types(types, last_event_id), do: Seven.EventStore.EventStore.events_by_types(types, last_event_id)
 
       defp subscribe_to_event_store(true) do
         unquote(listener_of_events) |> Enum.each(&Seven.EventStore.EventStore.subscribe(&1, self()))

@@ -6,9 +6,6 @@ defmodule Seven.EventStore.EventStore do
   alias Seven.Data.Persistence
   alias Seven.EventStore.State
 
-  # or :infinity
-  @timeout 60_000
-
   # API
   @spec start_link(List.t()) :: {:ok, pid}
   def start_link(opts \\ []) do
@@ -34,20 +31,19 @@ defmodule Seven.EventStore.EventStore do
   def state(), do: GenServer.call(__MODULE__, :state)
 
   @spec events_by_correlation_id(bitstring, integer) :: [map]
-  def events_by_correlation_id(correlation_id, after_counter \\ -1) do
-    GenServer.call(__MODULE__, {:events_by_correlation_id, correlation_id, after_counter}, @timeout)
-  end
+  def events_by_correlation_id(correlation_id, after_counter \\ -1),
+    do: Persistence.events_by_correlation_id(correlation_id, after_counter)
 
   @spec event_by_id(bitstring) :: map
-  def event_by_id(id), do: GenServer.call(__MODULE__, {:event_by_id, id})
+  def event_by_id(id),
+    do: Persistence.event_by_id(id)
 
   @spec events_by_types([bitstring], integer) :: any
-  def events_by_types(types, after_counter \\ -1), do: GenServer.call(__MODULE__, {:events_by_types, types, after_counter}, @timeout)
+  def events_by_types(types, after_counter \\ -1),
+    do: Persistence.events_by_types(types, after_counter)
 
-  def events_stream_to_list(stream) do
-    stream
-    |> Seven.Data.Persistence.stream_to_list()
-    |> to_events()
+  def events_reduce(stream, acc, fun) do
+    Persistence.events_reduce(stream, acc, &fun.(to_event(&1), &2))
   end
 
   # Callbacks
@@ -63,18 +59,6 @@ defmodule Seven.EventStore.EventStore do
 
   def handle_call(:state, _from, state),
     do: {:reply, %{event_store: state, events: Persistence.events()}, state}
-
-  def handle_call({:events_by_correlation_id, correlation_id, after_counter}, _from, state) do
-    events_stream = Persistence.events_by_correlation_id(correlation_id, after_counter)
-    {:reply, events_stream, state}
-  end
-
-  def handle_call({:event_by_id, id}, _from, state), do: {:reply, Persistence.event_by_id(id), state}
-
-  def handle_call({:events_by_types, types, after_counter}, _from, state) do
-    events_stream = Persistence.events_by_types(types, after_counter)
-    {:reply, events_stream, state}
-  end
 
   def handle_call({:fire, event}, _from, state) do
     event = Map.put(event, :counter, State.next_counter(state))
@@ -107,9 +91,8 @@ defmodule Seven.EventStore.EventStore do
   # Privates
   defp fire(event, pids), do: pids |> broadcast(event)
 
-  defp to_events(events) when is_list(events) do
-    events
-    |> Enum.map(fn e -> struct(Seven.Otters.Event, AtomicMap.convert(e, safe: false)) end)
+  defp to_event(event) do
+    struct(Seven.Otters.Event, AtomicMap.convert(event, safe: false))
   end
 
   defp broadcast([], event), do: event

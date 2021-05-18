@@ -177,7 +177,7 @@ defmodule Seven.Otters.Aggregate do
               |> Events.set_correlation_id(state.correlation_id)
               |> Events.set_process_id(command.process_id)
 
-            new_internal_state = apply_events(events, state.internal_state)
+            new_internal_state = Enum.reduce(events, state.internal_state, &apply_event(&1, &2))
             Events.trigger(events)
 
             {:reply, :managed, %{state | internal_state: new_internal_state}}
@@ -196,13 +196,9 @@ defmodule Seven.Otters.Aggregate do
         Seven.Otters.Event.create(type, payload, __MODULE__)
       end
 
-      @spec apply_events([Seven.Otters.Event.t()], Map.t()) :: Map.t()
-      defp apply_events([], state), do: state
-
-      defp apply_events([event | events], state) do
+      defp apply_event(event, state) do
         Seven.Log.event_received(event, __MODULE__)
-        new_state = handle_event(event, state)
-        apply_events(events, new_state)
+        handle_event(event, state)
       end
 
       defp unload_aggregate() do
@@ -211,13 +207,12 @@ defmodule Seven.Otters.Aggregate do
       end
 
       defp rehydrate(correlation_id) do
-        events =
+        Seven.Log.info("Rehydrating #{inspect(correlation_id)}.")
+
+        state =
           correlation_id
           |> Seven.EventStore.EventStore.events_by_correlation_id()
-          |> Seven.EventStore.EventStore.events_stream_to_list()
-
-        Seven.Log.info("Processing #{length(events)} events for #{inspect(correlation_id)}.")
-        state = apply_events(events, init_state())
+          |> Seven.EventStore.EventStore.events_reduce(init_state(), &apply_event(&1, &2))
 
         Seven.Log.info("#{inspect(correlation_id)} rehydrated.")
 
