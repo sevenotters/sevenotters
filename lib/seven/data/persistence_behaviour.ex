@@ -13,7 +13,7 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback drop_events() :: any
   @callback drop_processes() :: any
 
-  @callback stream_to_list(any) :: [map]
+  @callback events_reduce(any, any, fun()) :: any
 
   @callback event_by_id(bitstring) :: map
   @callback events_by_correlation_id(bitstring, integer) :: [map]
