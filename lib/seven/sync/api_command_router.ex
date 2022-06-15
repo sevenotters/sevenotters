@@ -56,7 +56,7 @@ defmodule Seven.Sync.ApiCommandRouter do
           state: :unmanaged,
           params: params,
           wait_for_events: unquote(post)[:wait_for_events] || [],
-          timeout: unquote(post)[:timeout] || 5_000
+          timeout: unquote(post)[:timeout] || 60_000
         }
         |> internal_pre_command
         |> subscribe_to_event_store

@@ -14,7 +14,8 @@ defmodule Seven.Sync.ApiQueryRouter do
           state: :unmanaged,
           params: params,
           projection: unquote(post).projection,
-          query: unquote(post).query
+          query: unquote(post).query,
+          timeout: unquote(post)[:timeout] || 60_000
         }
         |> internal_pre_query
         |> send_query_request
