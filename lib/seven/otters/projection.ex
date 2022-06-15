@@ -22,7 +22,7 @@ defmodule Seven.Otters.Projection do
       @spec query(Atom.t(), Map.t(), Keyword.t()) :: List.t()
       def query(query_filter, params, opts \\ []) do
         projection_name = Keyword.get(opts, :name, __MODULE__)
-        timeout = Keyword.get(opts, :timeout, 5_000)
+        timeout = Keyword.get(opts, :timeout, 60_000)
 
         GenServer.call(projection_name, {:query, query_filter, params}, timeout)
       end
