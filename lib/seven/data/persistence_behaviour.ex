@@ -4,6 +4,7 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback initialize() :: any
   @callback insert_event(map) :: any
   @callback upsert_process(bitstring, map) :: any
+  @callback upsert_services(bitstring, map) :: any
   @callback new_id :: any
   @callback new_printable_id :: bitstring
   @callback object_id(bitstring) :: any
@@ -21,6 +22,7 @@ defmodule Seven.Data.PersistenceBehaviour do
   @callback events() :: [map]
   @callback processes() :: [map]
   @callback get_process(bitstring) :: map | nil
+  @callback get_service(bitstring) :: map | nil
 
   @callback processes_id_by_status(bitstring) :: [map]
 end

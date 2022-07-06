@@ -23,6 +23,13 @@ defmodule Seven.Data.Persistence do
   def upsert_process(process_id, %{} = value),
     do: persistence().upsert_process(process_id, value)
 
+  @spec upsert_service(bitstring, map) :: any
+  def upsert_service(server_name, %{__struct__: _} = value),
+    do: persistence().upsert_service(server_name, value |> Map.from_struct())
+
+  def upsert_service(server_name, %{} = value),
+    do: persistence().upsert_service(server_name, value)
+
   @spec new_id :: map
   def new_id, do: persistence().new_id()
 
@@ -59,6 +66,9 @@ defmodule Seven.Data.Persistence do
 
   @spec get_process(bitstring) :: map | nil
   def get_process(correlation_id), do: persistence().get_process(correlation_id)
+
+  @spec get_service(bitstring) :: map | nil
+  def get_service(correlation_id), do: persistence().get_service(correlation_id)
 
   @spec drop_events() :: any
   def drop_events(), do: persistence().drop_events()
